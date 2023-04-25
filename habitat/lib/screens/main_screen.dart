@@ -34,13 +34,20 @@ class _MainScreenState extends State<MainScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "main screen 서울 남산체",
+                "main screen",
                 style: TextStyle(
                   fontSize: 48,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ],
+          ),
+          const Text(
+            "서울 남산체",
+            style: TextStyle(
+              fontSize: 48,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(
             height: 20,
@@ -50,53 +57,56 @@ class _MainScreenState extends State<MainScreen> {
             children: [
               OutlinedButton(
                 style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(8),
                 ),
                 onPressed: goReport,
                 child: const Text(
                   "Report Page",
                   style: TextStyle(
-                    fontSize: 32,
+                    fontSize: 14,
                   ),
                 ),
               ),
               OutlinedButton(
                 style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(8),
                 ),
                 onPressed: goReward,
                 child: const Text(
                   "Reward Page",
                   style: TextStyle(
-                    fontSize: 32,
+                    fontSize: 14,
                   ),
                 ),
               ),
               OutlinedButton(
                 style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(8),
                 ),
                 onPressed: goSocial,
                 child: const Text(
                   "Social Page",
                   style: TextStyle(
-                    fontSize: 32,
+                    fontSize: 14,
                   ),
                 ),
               ),
               OutlinedButton(
                 style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(8),
                 ),
                 onPressed: goSetting,
                 child: const Text(
                   "Setting Page",
                   style: TextStyle(
-                    fontSize: 32,
+                    fontSize: 14,
                   ),
                 ),
               ),
             ],
+          ),
+          const Row(
+            children: [],
           )
         ],
       ),
