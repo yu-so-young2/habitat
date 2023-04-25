@@ -11,6 +11,8 @@ void main() {
       title: "habit@",
       theme: ThemeData(
         fontFamily: "SeoulNamsan",
+        primaryColor: const Color(0xFF78C6F7),
+        scaffoldBackgroundColor: const Color(0xFFA1EF7A),
       ),
       initialRoute: '/',
       routes: {
