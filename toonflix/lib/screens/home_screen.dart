@@ -7,7 +7,13 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Today's 툰s"),
+        elevation: 2,
+        title: const Text(
+          "Today's 툰s",
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.green,
       ),
     );
   }
