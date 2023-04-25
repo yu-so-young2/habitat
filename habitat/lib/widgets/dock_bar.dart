@@ -18,22 +18,27 @@ class _DockBarState extends State<DockBar> {
         children: [
           DockBarTab(
             tabname: "report",
+            tablocate: "/report",
             tabicon: Icons.library_books_rounded,
           ),
           DockBarTab(
             tabname: "reward",
+            tablocate: "/reward",
             tabicon: Icons.emoji_events_rounded,
           ),
           DockBarTab(
             tabname: "home",
+            tablocate: "/",
             tabicon: Icons.home,
           ),
           DockBarTab(
             tabname: "social",
+            tablocate: "/social",
             tabicon: Icons.people_alt_rounded,
           ),
           DockBarTab(
             tabname: "setting",
+            tablocate: "/setting",
             tabicon: Icons.settings,
           ),
         ],
@@ -43,21 +48,22 @@ class _DockBarState extends State<DockBar> {
 }
 
 class DockBarTab extends StatelessWidget {
-  final String tabname;
+  final String tabname, tablocate;
   final IconData tabicon;
 
   const DockBarTab({
     super.key,
     required this.tabname,
+    required this.tablocate,
     required this.tabicon,
   });
-
-  void pressbutton() {}
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      onPressed: () {},
+      onPressed: () {
+        Navigator.pushNamed(context, tablocate);
+      },
       style: TextButton.styleFrom(
         fixedSize: const Size(60, 60),
         padding: const EdgeInsets.all(8),
@@ -67,16 +73,8 @@ class DockBarTab extends StatelessWidget {
           borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
       ),
-      // boxShadow: const [
-      //   BoxShadow(
-      //     blurRadius: 30,
-      //     blurStyle: BlurStyle.inner,
-      //     color: Colors.black,
-      //     offset: Offset(5, 5),
-      //     spreadRadius: 0.1,
-      //   )
-      // ],
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(tabicon),
           Text(tabname),

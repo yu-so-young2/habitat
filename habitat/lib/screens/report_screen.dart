@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:habitat/widgets/dock_bar.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -28,6 +29,7 @@ class _ReportScreenState extends State<ReportScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: DockBar(),
     );
   }
 }

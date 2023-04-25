@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:habitat/widgets/dock_bar.dart';
 
 class SocialScreen extends StatefulWidget {
   const SocialScreen({super.key});
@@ -28,6 +29,7 @@ class _SocialScreenState extends State<SocialScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: DockBar(),
     );
   }
 }
