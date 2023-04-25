@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:habitat/widgets/dock_bar.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -105,9 +106,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ],
           ),
-          const Row(
-            children: [],
-          )
+          const DockBar()
         ],
       ),
     );
