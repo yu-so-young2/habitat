@@ -1,10 +1,9 @@
 package com.ssafy.habitat.repository;
 
-import com.ssafy.habitat.entity.Coaster;
+import com.ssafy.habitat.entity.Log;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CoasterRepository extends JpaRepository<Coaster, String> {
-
+public interface LogRepository extends JpaRepository<Log, Integer> {
 }
