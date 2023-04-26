@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:habitat/widgets/dock_bar.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -8,22 +9,6 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  void goReport() {
-    Navigator.pushNamed(context, '/report');
-  }
-
-  void goReward() {
-    Navigator.pushNamed(context, '/reward');
-  }
-
-  void goSocial() {
-    Navigator.pushNamed(context, '/social');
-  }
-
-  void goSetting() {
-    Navigator.pushNamed(context, '/setting');
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,67 +34,28 @@ class _MainScreenState extends State<MainScreen> {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(
-            height: 20,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+          Stack(
             children: [
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.all(8),
-                ),
-                onPressed: goReport,
-                child: const Text(
-                  "Report Page",
-                  style: TextStyle(
-                    fontSize: 14,
-                  ),
+              Positioned(
+                bottom: 60,
+                child: Container(
+                  width: 300,
+                  height: 200,
+                  color: Colors.amber,
                 ),
               ),
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.all(8),
-                ),
-                onPressed: goReward,
-                child: const Text(
-                  "Reward Page",
-                  style: TextStyle(
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.all(8),
-                ),
-                onPressed: goSocial,
-                child: const Text(
-                  "Social Page",
-                  style: TextStyle(
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.all(8),
-                ),
-                onPressed: goSetting,
-                child: const Text(
-                  "Setting Page",
-                  style: TextStyle(
-                    fontSize: 14,
-                  ),
-                ),
+              Image.asset(
+                "lib/assets/images/glass.png",
+                width: 400,
               ),
             ],
           ),
-          const Row(
-            children: [],
-          )
+          const SizedBox(
+            height: 20,
+          ),
         ],
       ),
+      bottomNavigationBar: const DockBar(),
     );
   }
 }

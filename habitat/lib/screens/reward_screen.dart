@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:habitat/widgets/dock_bar.dart';
 
 class RewardScreen extends StatefulWidget {
   const RewardScreen({super.key});
@@ -28,6 +29,7 @@ class _RewardScreenState extends State<RewardScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: DockBar(),
     );
   }
 }

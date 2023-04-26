@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:habitat/widgets/dock_bar.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -28,6 +29,7 @@ class _SettingScreenState extends State<SettingScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: DockBar(),
     );
   }
 }
