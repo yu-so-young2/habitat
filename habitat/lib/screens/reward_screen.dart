@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:habitat/widgets/dock_bar.dart';
 
+import 'package:step_progress_indicator/step_progress_indicator.dart';
+
 class RewardScreen extends StatefulWidget {
   const RewardScreen({super.key});
 
@@ -11,11 +13,11 @@ class RewardScreen extends StatefulWidget {
 class _RewardScreenState extends State<RewardScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
@@ -27,9 +29,21 @@ class _RewardScreenState extends State<RewardScreen> {
               ),
             ],
           ),
+          CircularStepProgressIndicator(
+            totalSteps: 100,
+            currentStep: 75,
+            stepSize: 10,
+            selectedColor: Colors.greenAccent,
+            unselectedColor: Colors.grey[200],
+            padding: 0,
+            width: 150,
+            height: 150,
+            selectedStepSize: 15,
+            roundedCap: (_, __) => true,
+          ),
         ],
       ),
-      bottomNavigationBar: DockBar(),
+      bottomNavigationBar: const DockBar(),
     );
   }
 }
