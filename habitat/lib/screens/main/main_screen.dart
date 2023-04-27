@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:habitat/screens/main/main_panelwidget.dart';
 import 'package:habitat/widgets/dock_bar.dart';
 import 'package:sliding_up_panel2/sliding_up_panel2.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
@@ -26,6 +27,9 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SlidingUpPanel(
+        minHeight: 50,
+        maxHeight: 400,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(36)),
         body: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -36,11 +40,14 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            // mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const SizedBox(
+                height: 72,
+              ),
               Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 28),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -56,7 +63,7 @@ class _MainScreenState extends State<MainScreen> {
                         ),
                       ),
                       child: const Text(
-                        "main screen",
+                        "하루에 한잔씩 물을 마십시다!",
                         style: TextStyle(
                           fontSize: 18,
                         ),
@@ -74,26 +81,27 @@ class _MainScreenState extends State<MainScreen> {
                 alignment: Alignment.center,
                 children: [
                   Container(
-                    height: 360,
-                    width: 360,
+                    height: 240,
+                    width: 240,
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(360),
-                        color: Colors.blue[600]),
+                      shape: BoxShape.circle,
+                      color: Colors.blue[600],
+                    ),
                   ),
                   CircularStepProgressIndicator(
                     totalSteps: 100,
                     currentStep: amountwater,
-                    stepSize: 35,
+                    stepSize: 30,
                     selectedColor: const Color(0xFF9CD2F7),
                     unselectedColor: const Color(0xFFDCE9FC),
                     padding: 0,
-                    width: 400,
-                    height: 400,
-                    selectedStepSize: 35,
+                    width: 280,
+                    height: 280,
+                    selectedStepSize: 30,
                     // roundedCap: (_, __) => false,
                   ),
                   Text(
-                    "$amountwater %",
+                    "$amountwater.0 L",
                     style: const TextStyle(
                       fontSize: 56,
                       fontWeight: FontWeight.w600,
@@ -118,31 +126,9 @@ class _MainScreenState extends State<MainScreen> {
             ],
           ),
         ),
-        panelBuilder: () => const PanelWidget(),
+        panelBuilder: () => const MainPanelWidget(),
       ),
       bottomNavigationBar: const DockBar(),
-    );
-  }
-}
-
-class PanelWidget extends StatelessWidget {
-  const PanelWidget({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: EdgeInsets.zero,
-      children: const [
-        SizedBox(
-          height: 36,
-        ),
-        Text("되나?되나?되나???????????????????"),
-        SizedBox(
-          height: 24,
-        ),
-      ],
     );
   }
 }
