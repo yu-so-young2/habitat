@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:habitat/utils/bluetooth.dart';
 import 'package:habitat/widgets/dock_bar.dart';
 
 class SettingScreen extends StatefulWidget {
@@ -27,6 +28,7 @@ class _SettingScreenState extends State<SettingScreen> {
               ),
             ],
           ),
+          Bluetooth(),
         ],
       ),
       bottomNavigationBar: DockBar(),
