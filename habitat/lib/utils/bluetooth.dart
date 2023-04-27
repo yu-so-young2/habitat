@@ -12,7 +12,7 @@ class Bluetooth extends StatefulWidget {
 class _BluetoothState extends State<Bluetooth> {
   late BluetoothDevice _device;
   late BluetoothCharacteristic _characteristic;
-  bool _isConnected = false;
+  FlutterBluePlus flutterBlue = FlutterBluePlus.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -34,20 +34,37 @@ class _BluetoothState extends State<Bluetooth> {
             onPressed: _sendData,
             child: const Text('Send data'),
           ),
+          ElevatedButton(
+            onPressed: _stopForDevices,
+            child: const Text('stop data'),
+          ),
         ],
       ),
     );
   }
 
   void _scanForDevices() async {
-    // Scan for Bluetooth LE devices
-    List<BluetoothDevice> devices = await FlutterBluePlus.instance
-        .startScan(timeout: const Duration(seconds: 5));
+    // Start scanning
+    print('start scanning');
+    await flutterBlue.startScan(timeout: const Duration(seconds: 4));
 
-    // Print the name and ID of each device found
-    for (BluetoothDevice device in devices) {
-      print('Found device: ${device.name} (${device.id})');
-    }
+    print(flutterBlue.scanResults.first.toString());
+    // Listen to scan results
+    var subscription = flutterBlue.scanResults.listen((results) {
+      // do something with scan results
+      print("나의 $results");
+      for (ScanResult r in results) {
+        print("okokyo");
+        print('${r.device.name} found! rssi: ${r.rssi}');
+        print("okokyo!!!!!!!!!!!!");
+      }
+    });
+  }
+
+  void _stopForDevices() async {
+    // Stop scanning
+    flutterBlue.stopScan();
+    print('stop scanning');
   }
 
   void _connectToDevice() async {
@@ -68,11 +85,6 @@ class _BluetoothState extends State<Bluetooth> {
           }
         }
       }
-
-      setState(() {
-        _isConnected = true;
-      });
-
       print('Connected to device');
     } catch (e) {
       print('Error connecting to device: $e');

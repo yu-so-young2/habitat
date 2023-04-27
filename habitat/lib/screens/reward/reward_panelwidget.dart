@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class MainPanelWidget extends StatelessWidget {
-  const MainPanelWidget({
+class RewardPanelWidget extends StatelessWidget {
+  const RewardPanelWidget({
     Key? key,
   }) : super(key: key);
 
@@ -15,7 +15,7 @@ class MainPanelWidget extends StatelessWidget {
           child: Align(
             alignment: Alignment.bottomCenter,
             child: Text(
-              "water log",
+              "collection",
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 25,

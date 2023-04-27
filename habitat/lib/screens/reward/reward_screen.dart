@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:habitat/screens/reward/reward_panelwidget.dart';
 import 'package:habitat/widgets/dock_bar.dart';
 import 'package:sliding_up_panel2/sliding_up_panel2.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
@@ -15,9 +16,17 @@ class _RewardScreenState extends State<RewardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SlidingUpPanel(
+        margin: const EdgeInsets.symmetric(horizontal: 10),
         minHeight: 50,
         maxHeight: 400,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(36)),
+        collapsed: const Align(
+          alignment: Alignment.topCenter,
+          child: Icon(
+            Icons.keyboard_double_arrow_up_rounded,
+            size: 25,
+          ),
+        ),
         body: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -160,32 +169,9 @@ class _RewardScreenState extends State<RewardScreen> {
             ],
           ),
         ),
-        panelBuilder: () => const PanelWidget(),
+        panelBuilder: () => const RewardPanelWidget(),
       ),
       bottomNavigationBar: const DockBar(),
-    );
-  }
-}
-
-class PanelWidget extends StatelessWidget {
-  const PanelWidget({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: EdgeInsets.zero,
-      children: const [
-        SizedBox(
-          height: 36,
-        ),
-        Text("슬라이딩 업 판넬", textAlign: TextAlign.center),
-        SizedBox(
-          height: 48,
-        ),
-        Text("이얏 호우!"),
-      ],
     );
   }
 }
