@@ -39,6 +39,8 @@
 
 deploy:
   stage: deploy
+  only:
+    - feature/fe-deploy
   script: 
     - cd habitat
     - flutter build web
