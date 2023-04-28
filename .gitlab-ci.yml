@@ -3,9 +3,9 @@ stages:
 
 build:
   stage: build # 빌드 단계
+  only: 
+    - feature/fe-deploay
   image: "cirrusci/flutter:latest" # 사용할 도커 이미지
-  before_script:
-    - flutter pub global activate dart_code_metrics
   script: 
     - cd habitat
     - flutter build web --release # 빌드
@@ -14,5 +14,3 @@ build:
     # - mv web adminlive # 폴더명 변경
     # # lftp를 통해 서버로 전송
     # - lftp -c "set ftp:ssl-force true;set ssl:verify-certificate false;set sftp:auto-confirm yes;open -u snow,$YPET_FTP_PASSWORD sftp://$SERVER_HOST; cd www/adminlive; lcd adminlive; mirror -Rnc; bye" 
-  only: 
-    - live_build # live_build만 적용
