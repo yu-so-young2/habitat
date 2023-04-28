@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 
 class RewardPanelWidget extends StatelessWidget {
+  final ScrollController controller;
+
   const RewardPanelWidget({
     Key? key,
+    required this.controller,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 60),
+      controller: controller,
+      padding: const EdgeInsets.symmetric(horizontal: 40),
       children: const [
         SizedBox(
           height: 50,
@@ -27,44 +31,99 @@ class RewardPanelWidget extends StatelessWidget {
         SizedBox(
           height: 30,
         ),
-        waterlog(),
-        waterlog(),
-        waterlog(),
-        waterlog(),
-        waterlog(),
-        waterlog(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Collectionitem(),
+            Collectionitem(),
+            Collectionitem(),
+          ],
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Collectionitem(),
+            Collectionitem(),
+            Collectionitem(),
+          ],
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Collectionitem(),
+            Collectionitem(),
+            Collectionitem(),
+          ],
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Collectionitem(),
+            Collectionitem(),
+            Collectionitem(),
+          ],
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Collectionitem(),
+            Collectionitem(),
+            Collectionitem(),
+          ],
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Collectionitem(),
+            Collectionitem(),
+            Collectionitem(),
+          ],
+        ),
+        SizedBox(
+          height: 20,
+        ),
       ],
     );
   }
 }
 
-class waterlog extends StatelessWidget {
-  const waterlog({
-    super.key,
-  });
+class Collectionitem extends StatelessWidget {
+  const Collectionitem({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 40,
-      margin: const EdgeInsets.only(bottom: 10),
+      width: 80,
+      height: 80,
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Colors.grey.shade300),
-        ),
-      ),
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Icon(
-            Icons.water_drop_rounded,
-            size: 30,
-            color: Colors.lightBlue,
+          color: Colors.white,
+          borderRadius: const BorderRadius.all(
+            Radius.circular(12),
           ),
-          Text("물 300 ml 섭취!!"),
-          Text("수정하기"),
-        ],
-      ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.7),
+              blurRadius: 5.0,
+              spreadRadius: 0.0,
+              offset: const Offset(0, 0),
+            )
+          ]),
+      child: Image.asset("lib/assets/images/sunflower.png"),
     );
   }
 }

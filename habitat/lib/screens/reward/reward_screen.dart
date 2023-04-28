@@ -5,13 +5,18 @@ import 'package:sliding_up_panel2/sliding_up_panel2.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class RewardScreen extends StatefulWidget {
-  const RewardScreen({super.key});
+  const RewardScreen({
+    super.key,
+  });
 
   @override
   State<RewardScreen> createState() => _RewardScreenState();
 }
 
 class _RewardScreenState extends State<RewardScreen> {
+  final ScrollController scrollController = ScrollController();
+  final PanelController panelController = PanelController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,6 +25,8 @@ class _RewardScreenState extends State<RewardScreen> {
         minHeight: 50,
         maxHeight: 400,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(36)),
+        controller: panelController,
+        scrollController: scrollController,
         collapsed: const Align(
           alignment: Alignment.topCenter,
           child: Icon(
@@ -169,7 +176,9 @@ class _RewardScreenState extends State<RewardScreen> {
             ],
           ),
         ),
-        panelBuilder: () => const RewardPanelWidget(),
+        panelBuilder: () => RewardPanelWidget(
+          controller: scrollController,
+        ),
       ),
       bottomNavigationBar: const DockBar(),
     );
