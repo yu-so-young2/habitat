@@ -12,6 +12,8 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  final ScrollController scrollController = ScrollController();
+  final PanelController panelController = PanelController();
   var amountwater = 75;
 
   void drinkup() {
@@ -31,6 +33,8 @@ class _MainScreenState extends State<MainScreen> {
         minHeight: 50,
         maxHeight: 400,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(36)),
+        controller: panelController,
+        scrollController: scrollController,
         collapsed: const Align(
           alignment: Alignment.topCenter,
           child: Icon(
@@ -134,7 +138,7 @@ class _MainScreenState extends State<MainScreen> {
             ],
           ),
         ),
-        panelBuilder: () => const MainPanelWidget(),
+        panelBuilder: () => MainPanelWidget(controller: scrollController),
       ),
       bottomNavigationBar: const DockBar(),
     );

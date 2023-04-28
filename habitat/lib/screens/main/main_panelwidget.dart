@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 
 class MainPanelWidget extends StatelessWidget {
+  final ScrollController controller;
+
   const MainPanelWidget({
     Key? key,
+    required this.controller,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 60),
+      controller: controller,
       children: const [
         SizedBox(
           height: 50,
@@ -27,6 +31,34 @@ class MainPanelWidget extends StatelessWidget {
         SizedBox(
           height: 30,
         ),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
+        waterlog(),
         waterlog(),
         waterlog(),
         waterlog(),
