@@ -1,16 +1,43 @@
-stages:
-  - build
+# This file is a template, and might need editing before it works on your project.
+# You can copy and paste this template into a new `.gitlab-ci.yml` file.
+# You should not add this template to an existing `.gitlab-ci.yml` file by using the `include:` keyword.
+#
+# To contribute improvements to CI/CD templates, please follow the Development guide at:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific template is located at:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Flutter.gitlab-ci.yml
 
-build:
-  stage: build # 빌드 단계
-  only: 
-    - feature/fe-deploay
-  image: "cirrusci/flutter:latest" # 사용할 도커 이미지
-  script: 
-    - cd habitat
-    - flutter build web --release # 빌드
-    - cd build
-    # 테스트
-    # - mv web adminlive # 폴더명 변경
-    # # lftp를 통해 서버로 전송
-    # - lftp -c "set ftp:ssl-force true;set ssl:verify-certificate false;set sftp:auto-confirm yes;open -u snow,$YPET_FTP_PASSWORD sftp://$SERVER_HOST; cd www/adminlive; lcd adminlive; mirror -Rnc; bye" 
+code_quality:
+  stage: test
+  image: "cirrusci/flutter:1.22.5"
+  before_script:
+    - pub global activate dart_code_metrics
+    - export PATH="$PATH:$HOME/.pub-cache/bin"
+  script:
+    - metrics lib -r codeclimate  > gl-code-quality-report.json
+  artifacts:
+    reports:
+      codequality: gl-code-quality-report.json
+
+test:
+  stage: test
+  image: "cirrusci/flutter:1.22.5"
+  before_script:
+    - pub global activate junitreport
+    - export PATH="$PATH:$HOME/.pub-cache/bin"
+  script:
+    - flutter test --machine --coverage | tojunit -o report.xml
+    - lcov --summary coverage/lcov.info
+    - genhtml coverage/lcov.info --output=coverage
+  coverage: '/lines\.*: \d+\.\d+\%/'
+  artifacts:
+    name: coverage
+    paths:
+      - $CI_PROJECT_DIR/coverage
+    reports:
+      junit: report.xml
+
+deploy:
+  stage: deploy
+  script: echo "Define your deployment script!"
+  environment: production
