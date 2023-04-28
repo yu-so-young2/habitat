@@ -3,13 +3,22 @@
 #include <BLEUtils.h>
 #include <BLE2902.h>
 
+bool deviceConnected = false;
+bool oldDeviceConnected = false;
+
 BLEServer *pServer = NULL;
 BLEService *pService = NULL;
 BLECharacteristic *pCharacteristic = NULL;
 BLEAdvertising *pAdvertising = NULL;
+
 #define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 
+class MyServerCallbacks: public BLEServerCallbacks {
+  void onConnect(BLEServer* pServer) {deviceConnected = true;
+  Serial.println("connect");};
+  void onDisconnect(BLEServer* pServer) {deviceConnected = false;}
+};
 
 class MyCallbackHandler : public BLECharacteristicCallbacks {
   void onWrite(BLECharacteristic *pCharacteristic) {
@@ -34,7 +43,7 @@ void setup() {
   BLEDevice::init("률류");
   // BLE 장치를 BLE 서버로 설정
   pServer = BLEDevice::createServer();
-
+  pServer->setCallbacks(new MyServerCallbacks());
   // 미리 정의한 UUID로 서버의 서비스 생성    
   pService = pServer->createService(SERVICE_UUID);
   // UUID 전달, 읽기, 쓰시 속성으로 설정
@@ -45,7 +54,7 @@ void setup() {
                                          BLECharacteristic::PROPERTY_NOTIFY |
                                          BLECharacteristic::PROPERTY_INDICATE
                                        );
-
+                                       
   pCharacteristic->setValue("Hello World says Neil");
   // characteristic의 특성을 설명하는 메타데이터를 설정할 수 있음
   // 이 문장이 없으면 notification이 제대로 이뤄지지 않는다
@@ -73,5 +82,16 @@ void setup() {
 
 void loop() {
   // Your main loop code here
-
+    // 이전에 연결한 기록이 있는 상태에서 견결이 끊기 상황
+  if (!deviceConnected && oldDeviceConnected) {	// disconnecting
+    delay(500); // give the bluetooth stack the chance to get things ready
+    pServer->startAdvertising(); // restart advertising
+    Serial.println("start advertising");
+    oldDeviceConnected = deviceConnected;
+  }
+  // 연결은 되었지만 이전에 연결한 기록이 없는 상황
+  if (deviceConnected && !oldDeviceConnected) {	// connecting
+    oldDeviceConnected = deviceConnected;
+  }
+  delay(2000);
 }
