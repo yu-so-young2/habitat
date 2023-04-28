@@ -27,9 +27,17 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SlidingUpPanel(
+        margin: const EdgeInsets.symmetric(horizontal: 10),
         minHeight: 50,
         maxHeight: 400,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(36)),
+        collapsed: const Align(
+          alignment: Alignment.topCenter,
+          child: Icon(
+            Icons.keyboard_double_arrow_up_rounded,
+            size: 25,
+          ),
+        ),
         body: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
