@@ -10,6 +10,7 @@ build:
     - cd habitat
     - flutter build web --release # 빌드
     - cd build
+    # 테스트
     # - mv web adminlive # 폴더명 변경
     # # lftp를 통해 서버로 전송
     # - lftp -c "set ftp:ssl-force true;set ssl:verify-certificate false;set sftp:auto-confirm yes;open -u snow,$YPET_FTP_PASSWORD sftp://$SERVER_HOST; cd www/adminlive; lcd adminlive; mirror -Rnc; bye" 
