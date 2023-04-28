@@ -1,0 +1,20 @@
+stages:
+  - build
+
+build:
+  stage: build # 빌드 단계
+  image: "cirrusci/flutter:latest" # 사용할 도커 이미지
+  before_script:
+    - cd lib 
+    - echo "$YPET_USER_LIVE" > setting_user.dart  # 변수를 통해 env파일처럼 gitignore에 추가한 파일 설정
+    - cd ..
+    - flutter pub global activate dart_code_metrics 
+    - export PATH="$PATH:$HOME/.pub-cache/bin" 
+  script: 
+    - flutter build web --release # 빌드
+    - cd build
+    # - mv web adminlive # 폴더명 변경
+    # # lftp를 통해 서버로 전송
+    # - lftp -c "set ftp:ssl-force true;set ssl:verify-certificate false;set sftp:auto-confirm yes;open -u snow,$YPET_FTP_PASSWORD sftp://$SERVER_HOST; cd www/adminlive; lcd adminlive; mirror -Rnc; bye" 
+  only: 
+    - live_build # live_build만 적용
