@@ -12,7 +12,9 @@ class _DockBarState extends State<DockBar> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: const BoxDecoration(),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+      ),
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [

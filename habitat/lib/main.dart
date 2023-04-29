@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:habitat/screens/main_screen.dart';
+import 'package:habitat/screens/main/main_screen.dart';
 import 'package:habitat/screens/report_screen.dart';
-import 'package:habitat/screens/reward_screen.dart';
-import 'package:habitat/screens/setting_screen.dart';
+import 'package:habitat/screens/reward/reward_screen.dart';
+import 'package:habitat/screens/settingscreen/setting_screen.dart';
 import 'package:habitat/screens/social_screen.dart';
 
 void main() {
