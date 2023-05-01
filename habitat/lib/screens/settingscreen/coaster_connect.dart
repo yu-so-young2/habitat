@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:habitat/screens/settingscreen/coaster_link.dart';
 
 class CoasterConnect extends StatefulWidget {
   const CoasterConnect({super.key});
@@ -10,10 +11,10 @@ class CoasterConnect extends StatefulWidget {
 }
 
 class _CoasterConnectState extends State<CoasterConnect> {
-  late BluetoothDevice _device;
   late BluetoothCharacteristic _characteristic;
   FlutterBluePlus flutterBlue = FlutterBluePlus.instance;
   List<ScanResult> scanResultList = [];
+  bool _isScanning = false;
 
   @override
   void initState() {
@@ -29,18 +30,18 @@ class _CoasterConnectState extends State<CoasterConnect> {
           const SizedBox(
             height: 50,
           ),
-          TextButton(
-            style: TextButton.styleFrom(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
               backgroundColor: Colors.lightBlue,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16.0),
+                borderRadius: BorderRadius.circular(12.0),
               ),
             ),
-            onPressed: _scanForDevices,
+            onPressed: _isScanning ? null : _scanForDevices,
             child: const Text(
               "기기 검색",
               style: TextStyle(
-                fontSize: 32,
+                fontSize: 26,
                 color: Colors.white,
               ),
             ),
@@ -48,22 +49,20 @@ class _CoasterConnectState extends State<CoasterConnect> {
           const SizedBox(
             height: 10,
           ),
-          const Text(
-            "검색된 블루투스 리스트",
-            style: TextStyle(color: Colors.black),
-          ),
           Builder(builder: (context) {
-            if (scanResultList.isEmpty) {
+            if (_isScanning) {
               return const Text(
-                "없다",
+                "블루투스 스캔중...",
                 style: TextStyle(
+                  fontSize: 14,
                   color: Colors.black,
                 ),
               );
             } else {
               return const Text(
-                "있다",
+                "스캔 완료",
                 style: TextStyle(
+                  fontSize: 14,
                   color: Colors.black,
                 ),
               );
@@ -74,22 +73,41 @@ class _CoasterConnectState extends State<CoasterConnect> {
             child: ListView.builder(
               itemCount: scanResultList.length,
               itemBuilder: (context, index) {
-                var devicename = scanResultList[index].device.name;
-                if (devicename.isNotEmpty) {
-                  return Text(
-                    devicename,
-                    style: const TextStyle(
-                      color: Colors.black,
+                var device = scanResultList[index];
+                return Container(
+                  height: 50,
+                  padding: const EdgeInsets.all(0),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 50, vertical: 10),
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(16.0),
                     ),
-                  );
-                } else {
-                  return const Text(
-                    "notting",
-                    style: TextStyle(
-                      color: Colors.black,
+                  ),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      disabledBackgroundColor: Colors.lightBlue,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(16)),
+                      ),
                     ),
-                  );
-                }
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                CoasterLink(connectdevice: device.device)),
+                      );
+                    },
+                    child: Text(
+                      deviceName(device),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                );
               },
             ),
           ),
@@ -98,47 +116,57 @@ class _CoasterConnectState extends State<CoasterConnect> {
     );
   }
 
-  void _scanForDevices() async {
-    // Start scanning
-    await flutterBlue.startScan(timeout: const Duration(seconds: 5));
-    // Listen to scan results
-    flutterBlue.scanResults.listen((results) {
-      // do something with scan results
-      setState(() {
-        print(results);
-        scanResultList = results;
-      });
-    });
+  // 신호값 출력
+  Widget deviceSignal(ScanResult r) {
+    return Text(r.rssi.toString());
   }
 
-  void _stopForDevices() async {
-    // Stop scanning
-    flutterBlue.stopScan();
-    print('stop scanning');
+  // MAC 주소 출력
+  Widget deviceMacAddress(ScanResult r) {
+    return Text(r.device.id.id);
   }
 
-  void _connectToDevice() async {
-    try {
-      // Connect to the selected device
-      await _device.connect();
+  // 장치 명 출력
+  String deviceName(ScanResult r) {
+    String name = '';
 
-      // Discover the services and characteristics of the device
-      List<BluetoothService> services = await _device.discoverServices();
-
-      for (BluetoothService service in services) {
-        List<BluetoothCharacteristic> characteristics = service.characteristics;
-        for (BluetoothCharacteristic characteristic in characteristics) {
-          if (characteristic.uuid.toString() ==
-              "00002a00-0000-1000-8000-00805f9b34fb") {
-            // This is the characteristic we want to use for data transfer
-            _characteristic = characteristic;
-          }
-        }
-      }
-      print('Connected to device');
-    } catch (e) {
-      print('Error connecting to device: $e');
+    if (r.device.name.isNotEmpty) {
+      name = r.device.name;
+    } else if (r.advertisementData.localName.isNotEmpty) {
+      name = r.advertisementData.localName;
+    } else {
+      name = "no name";
     }
+
+    return name;
+  }
+
+  void _scanForDevices() async {
+    // 스캔 결과 초기화
+    setState(() {
+      scanResultList.clear();
+    });
+
+    _isScanning = true;
+    //스캔 시작 제한시간 5초
+    await flutterBlue.startScan(timeout: const Duration(seconds: 5));
+    // 스캔 결과 할당
+    flutterBlue.scanResults.listen(
+      (results) {
+        setState(() {
+          for (var element in results) {
+            if (element.device.name != '') {
+              if (scanResultList
+                      .indexWhere((e) => e.device.id == element.device.id) <
+                  0) {
+                scanResultList.add(element);
+              }
+            }
+          }
+        });
+      },
+    );
+    _isScanning = false;
   }
 
   void _sendData() async {
