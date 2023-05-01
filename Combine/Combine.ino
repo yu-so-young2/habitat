@@ -1,4 +1,4 @@
-////---------타이머--------////
+////---------타이머---------////
 #include "esp_system.h"
 
 const int wdtTimeout = 3000;  //time in ms to trigger the watchdog
@@ -10,7 +10,11 @@ void IRAM_ATTR resetModule() {
   esp_restart();
 }
 
-////-------블루투스-------////
+////---------SPIFFS---------////
+#include "SPIFFS.h"
+String strValue = "";
+
+////---------블루투스---------////
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
@@ -52,8 +56,17 @@ class MyCallbackHandler : public BLECharacteristicCallbacks {
 
 void setup() {
   Serial.begin(115200);
+  ////---------SPIFFS---------////
+  Serial.println();
+  if (!SPIFFS.begin()) {
+    Serial.println("Failed to mount file system");
+    return;
+  }
+  SPIFFS.format();
+  listDir("/"); 
+  writeFile("/hello.txt", "");
 
-  ////--------블루투스--------////
+  ////---------블루투스---------////
   Serial.println("Starting BLE...");
   // BLE 장치 이름
   BLEDevice::init("률류");
@@ -96,26 +109,37 @@ void setup() {
   Serial.println("BLE server is ready.");
 
 
-  ////-------타이머--------////
+  ////---------타이머---------////
   Serial.println("running setup");
   timer = timerBegin(0, 80, true);                  //timer 0, div 80
   timerAttachInterrupt(timer, &resetModule, true);  //attach callback
   timerAlarmWrite(timer, wdtTimeout * 1000, false); //set time in us
   timerAlarmEnable(timer);                          //enable interrupt
 
-  Min = -1;
+  Min = 0;
   Hour = 0;
 }
 
 void loop() {
 
-  ////--------타이머--------////
+  ////---------타이머---------////
   timerWrite(timer, 0); //reset timer (feed watchdog)
-  if((millis()/1000) % 60 == 0 && millis()/1000 != 0)
+  if((millis()/1000) % 60 == 0)
   {
-    Serial.print("Min = ");
-    Serial.println(Min); 
     Min++;
+    Serial.print("Min = ");
+    Serial.println(Min);
+
+    // 파일 생성 및 데이터 쓰기
+    String data1 = "min : ";
+    String data2 =  (String)Min;
+    String data3 =  "\r\n";
+    String data = data1 + data2 + data3;
+    const char* Data = data.c_str();
+
+    appendFile("/hello.txt", Data);
+    readFile("/hello.txt");  
+    
   }
   if(Min % 60 == 0 && Min != 0)
   {
@@ -128,11 +152,11 @@ void loop() {
   Serial.print("Time to = ");
   Serial.println(millis()/1000); 
 
-  ////---------블루투스--------////
+  ////---------블루투스---------////
   // 연결이 잘 되고 있는 상황
   // 데이터 갱신 후 notification
   if(deviceConnected){	// notify changed value
-    pCharacteristic->setValue(Min);
+    pCharacteristic->setValue((uint8_t*)strValue.c_str(), strValue.length());
     pCharacteristic->notify();
     cnt++;
     delay(3);   // client가 올바르게 정보를 수산할 수 있도록 여유의 시간(레퍼런스에서 3ms)  
@@ -151,4 +175,86 @@ void loop() {
 
   delay(1000); //simulate work
   
+}
+
+
+void listDir(const char * dirname){
+  Serial.printf("Listing directory: %s\r\n", dirname);
+  File root = SPIFFS.open(dirname); // ESP8266은 확장자 "Dir"과 "File"로 구분해서 사용, ESP32는 "File"로 통합
+  File file = root.openNextFile();
+  while(file){ // 다음 파일이 있으면(디렉토리 또는 파일)
+    if(file.isDirectory()){ // 다음 파일이 디렉토리 이면
+      Serial.print("  DIR : "); Serial.println(file.name()); // 디렉토리 이름 출력
+    } else {                // 파일이면
+      Serial.print("  FILE: "); Serial.print(file.name());   // 파일이름
+      Serial.print("\tSIZE: "); Serial.println(file.size()); // 파일 크기
+    }
+    file = root.openNextFile();
+  }
+}
+
+void readFile(const char * path){
+  Serial.printf("Reading file: %s\r\n", path);
+  File file = SPIFFS.open(path, "r");
+  if(!file || file.isDirectory()){
+    Serial.println("- failed to open file for reading");
+    return;
+  }
+
+  strValue="";
+  Serial.println("read from file:");
+  while(file.available()){
+    int data = file.read();
+    Serial.write(data);
+    strValue = strValue + (char)data;
+  }
+
+  Serial.println("string");
+  Serial.println(strValue);  
+}
+
+void writeFile(const char * path, const char * message){
+  Serial.printf("Writing file: %s\r\n", path);
+  File file = SPIFFS.open(path, "w");
+  if(!file){
+    Serial.println("failed to open file for writing");
+    return;
+  }
+  if(file.print(message)){
+    Serial.println("file written");
+  } else {
+    Serial.println("frite failed");
+  }
+}
+
+void appendFile(const char * path, const char * message){
+  Serial.printf("Appending to file: %s\r\n", path);
+  File file = SPIFFS.open(path, "a");
+  if(!file){
+    Serial.println("failed to open file for appending");
+      return;
+  }
+  if(file.print(message)){
+    Serial.println("message appended");
+  } else {
+    Serial.println("append failed");
+  }
+}
+
+void renameFile(const char * path1, const char * path2){
+  Serial.printf("Renaming file %s to %s\r\n", path1, path2);
+  if (SPIFFS.rename(path1, path2)) {
+    Serial.println("file renamed");
+  } else {
+    Serial.println("rename failed");
+  }
+}
+
+void deleteFile(const char * path){
+  Serial.printf("Deleting file: %s\r\n", path);
+  if(SPIFFS.remove(path)){
+    Serial.println("file deleted");
+  } else {
+    Serial.println("delete failed");
+  }
 }
