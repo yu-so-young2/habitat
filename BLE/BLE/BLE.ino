@@ -83,7 +83,7 @@ void setup() {
 void loop() {
   // 연결이 잘 되고 있는 상황
   // 데이터 갱신 후 notification
-  if(deviceConnected){	// notify changed value
+  if(deviceConnected){
     pCharacteristic->setValue(cnt);
     pCharacteristic->notify();
     cnt++;
