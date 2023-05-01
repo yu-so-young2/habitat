@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:habitat/screens/settingscreen/coaster_connect.dart';
+import 'package:habitat/screens/settingscreen/setting_water.dart';
 import 'package:habitat/widgets/dock_bar.dart';
 
 class SettingScreen extends StatefulWidget {
@@ -96,10 +97,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 ),
               ),
               const settingbox(),
-              const settingbox(),
-              const settingbox(),
-              const settingbox(),
-              const settingbox(),
+
               // Bluetooth(),
             ],
           ),
@@ -110,10 +108,20 @@ class _SettingScreenState extends State<SettingScreen> {
   }
 }
 
-class settingbox extends StatelessWidget {
+class settingbox extends StatefulWidget {
   const settingbox({
     super.key,
   });
+
+  @override
+  State<settingbox> createState() => _settingboxState();
+}
+
+class _settingboxState extends State<settingbox> {
+  onSettingWater() {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const SettingWater()));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -155,9 +163,9 @@ class settingbox extends StatelessWidget {
             ),
           ),
           TextButton(
-            onPressed: null,
+            onPressed: onSettingWater,
             style: TextButton.styleFrom(
-              // minimumSize: Size.zero,
+              foregroundColor: const Color(0xff47799B),
               padding: const EdgeInsets.only(left: 10),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
