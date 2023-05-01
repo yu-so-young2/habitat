@@ -15,7 +15,22 @@ class _SettingWaterState extends State<SettingWater> {
   final activeList = ['활동량이 많음', '활동량 보통', '활동량 적음'];
   var selectedActiveValue;
 
-  onSubmitButton() {}
+  final _weightEditController = TextEditingController();
+  var _weight = 0;
+
+  onSubmitButton() {
+    print(_weightEditController.text);
+
+    // 여기에 api 요청 처리
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _weightEditController.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,14 +49,21 @@ class _SettingWaterState extends State<SettingWater> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Text('체중'),
+                const Text('체중'),
                 Flexible(
-                  child: TextField(),
+                  child: TextField(
+                    controller: _weightEditController,
+                    onChanged: (val) {
+                      setState(() {
+                        _weight = int.parse(val);
+                      });
+                    },
+                  ),
                 ),
-                Flexible(child: Text('kg')),
+                const Flexible(child: Text('kg')),
               ],
             ),
             Row(

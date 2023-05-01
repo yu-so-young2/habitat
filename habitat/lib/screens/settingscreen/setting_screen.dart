@@ -18,7 +18,10 @@ class _SettingScreenState extends State<SettingScreen> {
         title: const Text(
           "Setting 설정",
           style: TextStyle(
-              color: Colors.black, fontSize: 32, fontWeight: FontWeight.w600),
+            color: Color(0xff002B20),
+            fontSize: 28,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         automaticallyImplyLeading: false,
         // leading: IconButton(
