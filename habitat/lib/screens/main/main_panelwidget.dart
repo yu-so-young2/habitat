@@ -77,7 +77,7 @@ class waterlog extends StatelessWidget {
     if (drinkType == "c") {
       return Icons.coffee_rounded;
     } else if (drinkType == "d") {
-      return Icons.blender_rounded;
+      return Icons.sports_bar_rounded;
     } else {
       return Icons.water_drop_rounded;
     }
