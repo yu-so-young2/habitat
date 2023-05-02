@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
@@ -23,6 +25,7 @@ class _CoasterLinkState extends State<CoasterLink> {
   // 연결된 장치가 보내는 데이터 저장용
   Map<String, List<int>> notifyDatas = {};
 
+  // late leng;
   @override
   void initState() {
     super.initState();
@@ -78,7 +81,8 @@ class _CoasterLinkState extends State<CoasterLink> {
                   return characteristicInfo(bluetoothService[index]);
                 },
               ),
-            )
+            ),
+            // Text("길이는? ${leng.toString()}")
           ],
         ),
       ),
@@ -112,14 +116,20 @@ class _CoasterLinkState extends State<CoasterLink> {
 
         for (BluetoothService service in bleService) {
           for (BluetoothCharacteristic c in service.characteristics) {
+            // List<int> value = await c.read();
+            // print("배고파요");
+            // print(value);
             if (!c.isNotifying) {
+              // leng = c.value.length;
               try {
                 await c.setNotifyValue(true);
                 // 받을 데이터 변수 Map 형식으로 키 생성
                 notifyDatas[c.uuid.toString()] = List.empty();
+
                 c.value.listen((value) {
                   // 데이터 읽기 처리!
-                  print('${c.uuid}: $value');
+                  print('받은 데이터 : ${c.uuid}: $value');
+                  // print("리드에 뭐가 들었나 ${c.read().toString()}");
                   setState(() {
                     // 받은 데이터 저장 화면 표시용
                     notifyDatas[c.uuid.toString()] = value;
@@ -127,7 +137,7 @@ class _CoasterLinkState extends State<CoasterLink> {
                 });
 
                 // 설정 후 일정시간 지연
-                await Future.delayed(const Duration(milliseconds: 500));
+                // await Future.delayed(const Duration(milliseconds: 500));
               } catch (e) {
                 debugPrint('error ${c.uuid} $e');
               }
@@ -139,6 +149,7 @@ class _CoasterLinkState extends State<CoasterLink> {
     return returnValue ?? Future.value(false);
   }
 
+  // 연결 해제
   void disconnect() {
     try {
       setState(() {
@@ -169,7 +180,9 @@ class _CoasterLinkState extends State<CoasterLink> {
         if (notifyDatas.containsKey(c.uuid.toString())) {
           // notify 데이터가 존재한다면
           if (notifyDatas[c.uuid.toString()]!.isNotEmpty) {
-            data = notifyDatas[c.uuid.toString()].toString();
+            data += "블루투스 데이터 받아오기 \n";
+            data += notifyDatas[c.uuid.toString()].toString();
+            data = dataConvert(notifyDatas[c.uuid.toString()]!);
           }
         }
       }
@@ -188,4 +201,10 @@ class _CoasterLinkState extends State<CoasterLink> {
 
     return Text(info);
   }
+}
+
+String dataConvert(List<int> notifyDatas) {
+  String convertdata;
+  convertdata = ascii.decode(notifyDatas);
+  return convertdata;
 }
