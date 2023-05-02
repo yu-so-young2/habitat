@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:habitat/api/drinklogs/api_drinklogs.dart';
+import 'package:habitat/api/drinklog/api_drinklogs.dart';
 import 'package:habitat/models/drink_log_model.dart';
 
 class MainPanelWidget extends StatelessWidget {
@@ -11,7 +11,7 @@ class MainPanelWidget extends StatelessWidget {
   }) : super(key: key);
 
   final Future<List<Drinklogmodel>> drinklogdatas =
-      ApiDrinkLogs().getAllDrinkLogs('asdf');
+      ApiDrinkLogs().getTodayDrinkLogs('asdf');
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +42,7 @@ class MainPanelWidget extends StatelessWidget {
                     controller: controller,
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, index) {
-                      return waterlog(
+                      return WaterLog(
                           drink: snapshot.data![index].drink,
                           drinkType: snapshot.data![index].drinkType,
                           createdAt: snapshot.data![index].createdAt);
@@ -55,23 +55,30 @@ class MainPanelWidget extends StatelessWidget {
               ],
             );
           }
-          return const Text("non data");
+          return const Text(
+            "non data",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.w600,
+            ),
+          );
         });
   }
 }
 
-class waterlog extends StatelessWidget {
-  int drink;
-  String drinkType, createdAt;
+class WaterLog extends StatelessWidget {
+  final int drink;
+  final String drinkType, createdAt;
 
-  waterlog({
+  WaterLog({
     super.key,
     required this.drink,
     required this.drinkType,
     required this.createdAt,
   });
 
-  late var drinktime = DateTime.parse(createdAt);
+  late final drinktime = DateTime.parse(createdAt);
 
   IconData iconData(String drinkType) {
     if (drinkType == "c") {
@@ -119,7 +126,7 @@ class waterlog extends StatelessWidget {
             ),
           ),
           Text(
-            "${drinktime.month}/${drinktime.day} ${drinktime.hour}:${drinktime.minute} ",
+            "${drinktime.hour}:${drinktime.minute}",
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
