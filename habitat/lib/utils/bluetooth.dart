@@ -106,3 +106,42 @@ class _BluetoothState extends State<Bluetooth> {
     }
   }
 }
+
+class BluetoothScanBoutton extends StatefulWidget {
+  const BluetoothScanBoutton({super.key});
+
+  @override
+  State<BluetoothScanBoutton> createState() => _BluetoothScanBoutton();
+}
+
+class _BluetoothScanBoutton extends State<BluetoothScanBoutton> {
+  late BluetoothDevice _device;
+  late BluetoothCharacteristic _characteristic;
+  FlutterBluePlus flutterBlue = FlutterBluePlus.instance;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: _scanForDevices,
+      child: const Text("button"),
+    );
+  }
+
+  void _scanForDevices() async {
+    // Start scanning
+    print('start scanning');
+    await flutterBlue.startScan(timeout: const Duration(seconds: 4));
+
+    print(flutterBlue.scanResults.first.toString());
+    // Listen to scan results
+    var subscription = flutterBlue.scanResults.listen((results) {
+      // do something with scan results
+      print("나의 $results");
+      for (ScanResult r in results) {
+        print("okokyo");
+        print('${r.device.name} found! rssi: ${r.rssi}');
+        print("okokyo!!!!!!!!!!!!");
+      }
+    });
+  }
+}
