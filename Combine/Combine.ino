@@ -133,7 +133,7 @@ void loop() {
     // 파일 생성 및 데이터 쓰기
     String data1 = "min : ";
     String data2 =  (String)Min;
-    String data3 =  "\r\n";
+    String data3 =  " "; //\r\n
     String data = data1 + data2 + data3;
     const char* Data = data.c_str();
 
@@ -159,7 +159,7 @@ void loop() {
     pCharacteristic->setValue((uint8_t*)strValue.c_str(), strValue.length());
     pCharacteristic->notify();
     cnt++;
-    delay(3);   // client가 올바르게 정보를 수산할 수 있도록 여유의 시간(레퍼런스에서 3ms)  
+    delay(10);   // client가 올바르게 정보를 수신할 수 있도록 여유의 시간(레퍼런스에서 3ms)  
   }
   // 이전에 연결한 기록이 있는 상태에서 견결이 끊기 상황
   if (!deviceConnected && oldDeviceConnected) {	// disconnecting
