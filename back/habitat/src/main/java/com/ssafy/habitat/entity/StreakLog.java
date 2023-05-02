@@ -10,22 +10,15 @@ import javax.persistence.*;
 @Setter
 @Builder
 @Entity
-public class Planting extends BaseTime{
-
+public class StreakLog extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int plantingKey;
-
-    private int flowerCnt;
-    private int exp;
-    private int max;
-    private int lv;
+    private int streakLogKey;
+    private int curStreak;
+    private int maxStreak;
 
     @ManyToOne
     @JoinColumn(name = "user_key")
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "flower_key")
-    private Flower flower;
 }
