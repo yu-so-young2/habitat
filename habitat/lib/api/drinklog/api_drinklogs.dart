@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:habitat/api/base_url.dart';
 import 'package:habitat/models/drink_log_model.dart';
 import 'package:http/http.dart' as http;
@@ -48,6 +47,8 @@ class ApiDrinkLogs {
       }
     }
 
+    // debugPrint(response.body);
+    // debugPrint(DateTime.now().toString());
     return todaydrinklogdata;
   }
 
@@ -69,6 +70,6 @@ class ApiDrinkLogs {
       }),
     );
 
-    debugPrint(response.body);
+    // debugPrint(response.body);
   }
 }

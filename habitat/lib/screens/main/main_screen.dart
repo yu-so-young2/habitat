@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:habitat/api/user/api_users.dart';
+import 'package:habitat/models/users_model.dart';
 import 'package:habitat/screens/main/main_panelwidget.dart';
 import 'package:habitat/widgets/dock_bar.dart';
 import 'package:habitat/widgets/waterlog_Input_modal.dart';
@@ -17,6 +19,15 @@ class _MainScreenState extends State<MainScreen> {
   final PanelController panelController = PanelController();
   var amountwater = 75;
 
+  int usergoaldata = 1;
+
+  void importdata() async {
+    List<Usersmodel> userinfodata = [];
+    userinfodata = await ApiUsers().getUserInfo('asdf');
+    usergoaldata = userinfodata[0].goal;
+    setState(() {});
+  }
+
   void drinkup() {
     setState(() {
       amountwater = amountwater + 1;
@@ -28,6 +39,12 @@ class _MainScreenState extends State<MainScreen> {
 
   final drinkType = ['water', 'coffee', 'non-coffee'];
   var selectedDrinkTypeValue;
+
+  @override
+  void initState() {
+    super.initState();
+    importdata();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +122,7 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                   ),
                   CircularStepProgressIndicator(
-                    totalSteps: 100,
+                    totalSteps: usergoaldata,
                     currentStep: amountwater,
                     stepSize: 30,
                     selectedColor: const Color(0xFF9CD2F7),
