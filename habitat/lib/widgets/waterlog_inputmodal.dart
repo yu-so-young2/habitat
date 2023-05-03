@@ -2,16 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:habitat/api/drinklog/api_drinklogs.dart';
 
 class WaterLogInputModal extends StatefulWidget {
-  const WaterLogInputModal({super.key});
+  const WaterLogInputModal({super.key, required this.updatedata});
+  final Function updatedata;
 
   @override
   State<WaterLogInputModal> createState() => _WaterLogInputModalState();
 }
 
 class _WaterLogInputModalState extends State<WaterLogInputModal> {
+  // 음료 타입
   final drinkTypeList = ['water', 'coffee', 'non-coffee'];
+  // 선택한 음료 타입
   var selectedDrinkTypeValue = 'water';
+  // 선택한 음료 타입 api 전송코드
   var drinkType = 'w';
+  // 마신 음수량
+  var drink = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +29,7 @@ class _WaterLogInputModalState extends State<WaterLogInputModal> {
         _showdialog(context);
       },
       child: const Text(
-        "나와라 모달!!!!!!!!!!!!!",
+        "물 마시기",
         style: TextStyle(color: Colors.white),
       ),
     );
@@ -68,14 +74,23 @@ class _WaterLogInputModalState extends State<WaterLogInputModal> {
                             });
                           }),
                       const Text("을(를) "),
-                      const SizedBox(width: 40, child: TextField()),
+                      SizedBox(
+                          width: 40,
+                          child: TextField(
+                            onChanged: (value) {
+                              setState(() {
+                                drink = int.parse(value);
+                              });
+                            },
+                          )),
                       const Text('만큼 마셨습니다!'),
                     ],
                   ),
                   const SizedBox(height: 5),
                   TextButton(
                     onPressed: () {
-                      ApiDrinkLogs().postAddDrinkLog(100, drinkType, 'asdf');
+                      ApiDrinkLogs().postAddDrinkLog(drink, drinkType, 'asdf');
+                      widget.updatedata();
                       Navigator.pop(context);
                     },
                     child: const Text('전송'),

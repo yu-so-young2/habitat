@@ -48,7 +48,29 @@ class ApiDrinkLogs {
       }
     }
 
+    // debugPrint(response.body);
+    // debugPrint(DateTime.now().toString());
     return todaydrinklogdata;
+  }
+
+  // 유저의 오늘의 누적 음수량을 조회
+  Future<int> getTodaytotalDrink(String userKey) async {
+    int todaytotaldrinkdata = 0;
+
+    Uri url = Uri.http(
+      baseurl,
+      'drinkLogs/day/total',
+      {
+        'userKey': userKey,
+      },
+    );
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      // final temp = response.body;
+      todaytotaldrinkdata = int.parse(response.body);
+    }
+
+    return todaytotaldrinkdata;
   }
 
   // 유저가 마신 물, 음료 수동 기록
@@ -68,7 +90,8 @@ class ApiDrinkLogs {
         'drinkType': drinkType,
       }),
     );
-
-    debugPrint(response.body);
+    if (response.statusCode == 200) {
+      debugPrint("전송 성공");
+    }
   }
 }
