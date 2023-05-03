@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:habitat/screens/settingscreen/coaster_connect.dart';
 import 'package:habitat/screens/settingscreen/setting_water.dart';
 import 'package:habitat/widgets/dock_bar.dart';
 
@@ -18,9 +19,12 @@ class _SettingScreenState extends State<SettingScreen> {
         title: const Text(
           "Setting 설정",
           style: TextStyle(
-              color: Colors.black, fontSize: 32, fontWeight: FontWeight.w600),
+            color: Color(0xff002B20),
+            fontSize: 28,
+            fontWeight: FontWeight.w600,
+          ),
         ),
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: false, //뒤로가기 버튼 없애기
         // leading: IconButton(
         //   padding: EdgeInsets.zero,
         //   onPressed: () {
@@ -138,7 +142,13 @@ class _settingboxState extends State<settingbox> {
             height: 6,
           ),
           TextButton(
-            onPressed: null,
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CoasterConnect(),
+                  ));
+            },
             style: TextButton.styleFrom(
               // minimumSize: Size.zero,
               padding: const EdgeInsets.only(left: 10),
