@@ -116,6 +116,8 @@ class _CoasterLinkState extends State<CoasterLink> {
 
         for (BluetoothService service in bleService) {
           for (BluetoothCharacteristic c in service.characteristics) {
+            await widget.connectdevice.requestMtu(223);
+
             // List<int> value = await c.read();
             // print("배고파요");
             // print(value);
