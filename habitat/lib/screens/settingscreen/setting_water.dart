@@ -81,6 +81,7 @@ class _SettingWaterState extends State<SettingWater> {
                     ).toList(),
                     onChanged: (value) {
                       setState(() {
+                        debugPrint(value.toString());
                         selectedWeatherValue = value;
                       });
                     })

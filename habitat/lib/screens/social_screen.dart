@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:habitat/api/friends/api_friendcode.dart';
+import 'package:habitat/api/friends/api_friendsList.dart';
+import 'package:habitat/models/friends_list_model.dart';
 import 'package:habitat/widgets/dock_bar.dart';
 
 class SocialScreen extends StatefulWidget {
@@ -9,7 +13,16 @@ class SocialScreen extends StatefulWidget {
 }
 
 class _SocialScreenState extends State<SocialScreen> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  late var userCode = ApiFriendcode().getCode('asdf');
+
   onSubmitButton() {}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,17 +59,42 @@ class _SocialScreenState extends State<SocialScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        const Text(
-                          'AB1234',
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.w600),
-                        ),
-                        IconButton(
-                          onPressed: () {},
-                          icon: const Icon(Icons.copy_rounded),
-                          iconSize: 20,
-                          alignment: AlignmentDirectional.centerEnd,
-                        ),
+                        FutureBuilder(
+                            future: userCode,
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return Text(
+                                  snapshot.data.toString(),
+                                  style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w600),
+                                );
+                              } else {
+                                return const Text('없음');
+                              }
+                            }),
+                        FutureBuilder(
+                            future: userCode,
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return IconButton(
+                                  onPressed: () {
+                                    Clipboard.setData(ClipboardData(
+                                        text: snapshot.data.toString()));
+                                    if (!mounted) return;
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(const SnackBar(
+                                      content: Text('Copied to clipboard'),
+                                    ));
+                                  },
+                                  icon: const Icon(Icons.copy_rounded),
+                                  iconSize: 20,
+                                  alignment: AlignmentDirectional.centerEnd,
+                                );
+                              } else {
+                                return const Text('X');
+                              }
+                            }),
                       ],
                     ),
                   ),
@@ -182,5 +220,45 @@ class _SocialScreenState extends State<SocialScreen> {
       ),
       bottomNavigationBar: const DockBar(),
     );
+  }
+}
+
+class friendslist extends StatelessWidget {
+  String userKey, nickname, imgUrl, recent;
+  friendslist({
+    super.key,
+    required this.userKey,
+    required this.nickname,
+    required this.imgUrl,
+    required this.recent,
+  });
+
+  final Future<List<FriendsListModel>> friendslistdata =
+      ApiFriendsList().getFriendsList('asdf');
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: friendslistdata,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return ListView.separated(
+                itemBuilder: (context, index) {
+                  return friendslist(
+                      userKey: snapshot.data![index].userKey,
+                      nickname: snapshot.data![index].nickname,
+                      imgUrl: snapshot.data![index].imgUrl,
+                      recent: snapshot.data![index].recent);
+                },
+                separatorBuilder: (context, index) => const SizedBox(
+                      height: 10,
+                    ),
+                itemCount: snapshot.data!.length);
+          } else {
+            return const SizedBox(
+              height: 10,
+            );
+          }
+        });
   }
 }
