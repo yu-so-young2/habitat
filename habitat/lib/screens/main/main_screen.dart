@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:habitat/api/drinklog/api_drinklogs.dart';
 import 'package:habitat/api/user/api_users.dart';
 import 'package:habitat/models/users_model.dart';
 import 'package:habitat/screens/main/main_panelwidget.dart';
 import 'package:habitat/widgets/dock_bar.dart';
-import 'package:habitat/widgets/waterlog_Input_modal.dart';
+import 'package:habitat/widgets/waterlog_inputmodal.dart';
 import 'package:sliding_up_panel2/sliding_up_panel2.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 
@@ -17,28 +18,19 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final ScrollController scrollController = ScrollController();
   final PanelController panelController = PanelController();
-  var amountwater = 75;
 
-  int usergoaldata = 1;
+  // 일일 누적 음수량
+  var amountwater = 100;
+  //목표 음수량
+  var usergoaldata = 100;
 
   void importdata() async {
     List<Usersmodel> userinfodata = [];
     userinfodata = await ApiUsers().getUserInfo('asdf');
+    amountwater = await ApiDrinkLogs().getTodaytotalDrink('asdf');
     usergoaldata = userinfodata[0].goal;
     setState(() {});
   }
-
-  void drinkup() {
-    setState(() {
-      amountwater = amountwater + 1;
-      if (amountwater == 101) {
-        amountwater = 0;
-      }
-    });
-  }
-
-  final drinkType = ['water', 'coffee', 'non-coffee'];
-  var selectedDrinkTypeValue;
 
   @override
   void initState() {
@@ -134,11 +126,22 @@ class _MainScreenState extends State<MainScreen> {
                     // roundedCap: (_, __) => false,
                   ),
                   Text(
-                    "$amountwater.0 L",
+                    "${amountwater}ml",
                     style: const TextStyle(
-                      fontSize: 56,
+                      fontSize: 52,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 80,
+                    child: Text(
+                      "/ ${usergoaldata}ml",
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white70,
+                      ),
                     ),
                   )
                 ],
@@ -146,17 +149,10 @@ class _MainScreenState extends State<MainScreen> {
               const SizedBox(
                 height: 10,
               ),
-              TextButton(
-                style: const ButtonStyle(
-                  backgroundColor: MaterialStatePropertyAll(Colors.blue),
-                ),
-                onPressed: drinkup,
-                child: const Text(
-                  "물 한잔 마시기",
-                  style: TextStyle(color: Colors.white),
-                ),
+              Text(
+                "오늘 목표치의 ${(amountwater / usergoaldata * 100).toStringAsFixed(2)}%을 달성했어요! ",
               ),
-              const WaterLogInputModal(),
+              WaterLogInputModal(updatedata: importdata),
             ],
           ),
         ),

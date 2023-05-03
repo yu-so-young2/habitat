@@ -30,10 +30,8 @@ class ApiUsers {
     );
     final response = await http.get(url);
     if (response.statusCode == 200) {
-      final List<dynamic> temp = jsonDecode(response.body);
-      for (var e in temp) {
-        getuserinfodata.add(Usersmodel.fromJson(e));
-      }
+      final temp = jsonDecode(utf8.decode(response.bodyBytes));
+      getuserinfodata.add(Usersmodel.fromJson(temp));
     }
 
     return getuserinfodata;

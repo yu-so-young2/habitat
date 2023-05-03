@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:habitat/api/base_url.dart';
 import 'package:habitat/models/drink_log_model.dart';
 import 'package:http/http.dart' as http;
@@ -52,6 +53,26 @@ class ApiDrinkLogs {
     return todaydrinklogdata;
   }
 
+  // 유저의 오늘의 누적 음수량을 조회
+  Future<int> getTodaytotalDrink(String userKey) async {
+    int todaytotaldrinkdata = 0;
+
+    Uri url = Uri.http(
+      baseurl,
+      'drinkLogs/day/total',
+      {
+        'userKey': userKey,
+      },
+    );
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      // final temp = response.body;
+      todaytotaldrinkdata = int.parse(response.body);
+    }
+
+    return todaytotaldrinkdata;
+  }
+
   // 유저가 마신 물, 음료 수동 기록
   void postAddDrinkLog(int drink, String drinkType, String userKey) async {
     Uri url = Uri.http(
@@ -69,7 +90,8 @@ class ApiDrinkLogs {
         'drinkType': drinkType,
       }),
     );
-
-    // debugPrint(response.body);
+    if (response.statusCode == 200) {
+      debugPrint("전송 성공");
+    }
   }
 }
