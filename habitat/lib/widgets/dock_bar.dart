@@ -43,6 +43,11 @@ class _DockBarState extends State<DockBar> {
             tablocate: "/setting",
             tabicon: Icons.settings,
           ),
+          DockBarTab(
+            tabname: "loading",
+            tablocate: "/loading",
+            tabicon: Icons.circle_outlined,
+          ),
         ],
       ),
     );

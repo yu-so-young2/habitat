@@ -37,6 +37,7 @@ dependencies:
   step_progress_indicator: ^1.0.2
   sliding_up_panel2: ^3.2.2
   flutter_blue_plus: ^1.4.0
+  indexed: ^0.0.8
   http: ^0.13.5
 
 dev_dependencies:
@@ -64,6 +65,7 @@ flutter:
   assets:
     - lib/assets/images/glass.png
     - lib/assets/images/sunflower.png
+    - lib/assets/images/kakao.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
