@@ -12,21 +12,23 @@ import java.util.List;
 @Setter
 @Builder
 @Entity
-public class Flower extends BaseTime{
+public class UserFlower extends BaseTime{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int flowerKey;
-    private String name;
-    private String story;
-    private String getCondition;
-    private int maxExp;
+    private int userFlowerKey;
     private boolean streak;
-    private int streakValue;
     private boolean friend;
-    private int friendValue;
     private boolean drink;
-    private int drinkValue;
     private boolean connect;
+    private boolean isUnlocked;
+
+    @ManyToOne
+    @JoinColumn(name = "user_key")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "flower_key")
+    private Flower flower;
 
 }
