@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:habitat/screens/main/main_panelwidget.dart';
 import 'package:habitat/widgets/dock_bar.dart';
-import 'package:habitat/widgets/modal_list.dart';
+import 'package:habitat/widgets/waterlog_Input_modal.dart';
 import 'package:sliding_up_panel2/sliding_up_panel2.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 
@@ -25,6 +25,9 @@ class _MainScreenState extends State<MainScreen> {
       }
     });
   }
+
+  final drinkType = ['water', 'coffee', 'non-coffee'];
+  var selectedDrinkTypeValue;
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +127,7 @@ class _MainScreenState extends State<MainScreen> {
                 ],
               ),
               const SizedBox(
-                height: 20,
+                height: 10,
               ),
               TextButton(
                 style: const ButtonStyle(
@@ -136,18 +139,7 @@ class _MainScreenState extends State<MainScreen> {
                   style: TextStyle(color: Colors.white),
                 ),
               ),
-              TextButton(
-                style: const ButtonStyle(
-                  backgroundColor: MaterialStatePropertyAll(Colors.blue),
-                ),
-                onPressed: () {
-                  ModalList().waterLogInputModal(context);
-                },
-                child: const Text(
-                  "나와라 모달",
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
+              const WaterLogInputModal(),
             ],
           ),
         ),
