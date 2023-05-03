@@ -211,9 +211,7 @@ class _SocialScreenState extends State<SocialScreen> {
                   ),
                 ],
               ),
-              // ListView(
-
-              // )
+              friendslistWidget()
             ],
           ),
         ),
@@ -223,25 +221,22 @@ class _SocialScreenState extends State<SocialScreen> {
   }
 }
 
-class friendslist extends StatelessWidget {
-  String userKey, nickname, imgUrl, recent;
-  friendslist({
-    super.key,
-    required this.userKey,
-    required this.nickname,
-    required this.imgUrl,
-    required this.recent,
-  });
-
+class friendslistWidget extends StatelessWidget {
   final Future<List<FriendsListModel>> friendslistdata =
       ApiFriendsList().getFriendsList('asdf');
+
+  void test() {
+    debugPrint(friendslistdata.toString());
+  }
+
+  friendslistWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
         future: friendslistdata,
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
+          if (snapshot.hasData && snapshot.data != null) {
             return ListView.separated(
                 itemBuilder: (context, index) {
                   return friendslist(
@@ -260,5 +255,60 @@ class friendslist extends StatelessWidget {
             );
           }
         });
+  }
+}
+
+class friendslist extends StatelessWidget {
+  final String userKey, nickname, imgUrl, recent;
+  const friendslist({
+    super.key,
+    required this.userKey,
+    required this.nickname,
+    required this.imgUrl,
+    required this.recent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.black,
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(12)),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(right: 20),
+            child: Icon(
+              Icons.local_florist_rounded,
+              size: 50,
+            ),
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                nickname,
+                style: const TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                recent,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          )
+        ],
+      ),
+    );
   }
 }
