@@ -4,7 +4,7 @@ import 'package:habitat/api/user/api_users.dart';
 import 'package:habitat/models/users_model.dart';
 import 'package:habitat/screens/main/main_panelwidget.dart';
 import 'package:habitat/widgets/dock_bar.dart';
-import 'package:habitat/widgets/waterlog_inputmodal.dart';
+import 'package:habitat/widgets/waterlog_input_modal.dart';
 import 'package:sliding_up_panel2/sliding_up_panel2.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 
