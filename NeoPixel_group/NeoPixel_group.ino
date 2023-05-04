@@ -4,7 +4,8 @@
 #define LED_PIN 13     //네오픽셀에 신호를 줄 핀번호
 #define LED_COUNT 10  //아두이노에 연결된 네오픽셀의 개수
 
-Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+// 우리가 사용하는 모듈은 NEO_RGBW!!!
+Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_RGBW + NEO_KHZ800);
 // 라이브러리에서 네오픽셀 객체를 선언
 // 첫번째 인자 = 네오픽셀의 개수
 // 두번째 인자 = 신호를 출력할 핀번호
@@ -20,6 +21,7 @@ Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
      */
     
 void setup() {
+  Serial.begin(115200);
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   strip.show();            // 네오픽셀에 빛을 출력하기 위한 것인데 여기서는 모든 네오픽셀을 OFF하기 위해서 사용한다.
   strip.setBrightness(50); // 네오픽셀의 밝기 설정(최대 255까지 가능)
@@ -28,30 +30,31 @@ void setup() {
 void loop() {
   
   // 스트립 길이를 따라서 설정된 색으로 채운다.
-  // strip.Color(Red,   Green,   Blue) 스트립의 색상을 RGB순서대로 세팅해준다.각RGB마다 0~255까지 설정가능
+  // strip.Color(Green,   Red,   Blue) 스트립의 색상을 RGB순서대로 세팅해준다.각RGB마다 0~255까지 설정가능
   // colorWipe(스트립 색상, 딜레이 시간)
-  colorWipe(strip.Color(255,   0,   0), 50); // Red
-  colorWipe(strip.Color(  0, 255,   0), 50); // Green
-  colorWipe(strip.Color(  0,   0, 255), 50); // Blue
-  colorWipe(strip.Color(255, 255, 255), 50); // White
+  // colorWipe(strip.Color(255,   255,   255), 50); // Red
+  // colorWipe(strip.Color(  0, 255,   0), 50); // Green
+  // colorWipe(strip.Color(  0,   0, 255), 50); // Blue
+  // colorWipe(strip.Color(255, 255, 255), 50); // White
 
   
-  // 극장간판에 달린 전구가 빛나는것과 유사한 효과
-  // theaterChase(스트립 색상, 딜레이 시간)
-  theaterChase(strip.Color(127, 127, 127), 50); // White, half brightness
-  theaterChase(strip.Color(127,   0,   0), 50); // Red, half brightness
-  theaterChase(strip.Color(  0,   0, 127), 50); // Blue, half brightness
+  // // 극장간판에 달린 전구가 빛나는것과 유사한 효과
+  // // theaterChase(스트립 색상, 딜레이 시간)
+  // theaterChase(strip.Color(127, 127, 127), 50); // White, half brightness
+  // theaterChase(strip.Color(127,   0,   0), 50); // Red, half brightness
+  // theaterChase(strip.Color(  0,   0, 127), 50); // Blue, half brightness
 
-  // 전체 스트립에 색을 흐르는 무지개빛처럼 돌아가며 출력
-  rainbow(10);           
-  // 위에 theaterChase효과를 무지개빛으로 출력
-  theaterChaseRainbow(50); 
+  // // 전체 스트립에 색을 흐르는 무지개빛처럼 돌아가며 출력
+   rainbow(1);           
+  // // 위에 theaterChase효과를 무지개빛으로 출력
+  // theaterChaseRainbow(50); 
   
   //해당 함수들은 밑에 구현되어있다.
 }
 
 void colorWipe(uint32_t color, int wait) {
   for (int i = 0; i < strip.numPixels(); i++) { // For each pixel in strip...
+    Serial.println(i);
     strip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
     strip.show();                          //  Update strip to match
     delay(wait);                           //  Pause for a moment
@@ -71,7 +74,7 @@ void theaterChase(uint32_t color, int wait) {
     }
   }
 }
-
+// 코스터에 사용할 함수
 void rainbow(int wait) {  
   for (long firstPixelHue = 0; firstPixelHue < 5 * 65536; firstPixelHue += 256) {
     for (int i = 0; i < strip.numPixels(); i++) { 
