@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:habitat/api/base_url.dart';
 import 'package:habitat/models/friend_request_model.dart';
 import 'package:http/http.dart' as http;
@@ -20,5 +21,21 @@ class ApiFriendRequestList {
     }
 
     return friendlist;
+  }
+}
+
+class ApiFriendRequest {
+  final String baseurl = BaseUrl().rooturl;
+  final int friendRequestKey = 0;
+  bool result = false;
+
+  void postFriendRequest(int requestCode, String id) async {
+    Uri url = Uri.http(baseurl, 'friends/request/ok', {'userKey': id});
+    http.Response response = await http.post(url,
+        body: jsonEncode({'friendRequestKey': requestCode}));
+
+    if (response.statusCode == 200) {
+      debugPrint('수락');
+    }
   }
 }
