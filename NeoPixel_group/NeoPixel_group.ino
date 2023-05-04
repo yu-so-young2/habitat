@@ -24,7 +24,7 @@ void setup() {
   Serial.begin(115200);
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   strip.show();            // 네오픽셀에 빛을 출력하기 위한 것인데 여기서는 모든 네오픽셀을 OFF하기 위해서 사용한다.
-  strip.setBrightness(50); // 네오픽셀의 밝기 설정(최대 255까지 가능)
+  strip.setBrightness(200); // 네오픽셀의 밝기 설정(최대 255까지 가능)
 }
 
 void loop() {
@@ -32,7 +32,7 @@ void loop() {
   // 스트립 길이를 따라서 설정된 색으로 채운다.
   // strip.Color(Green,   Red,   Blue) 스트립의 색상을 RGB순서대로 세팅해준다.각RGB마다 0~255까지 설정가능
   // colorWipe(스트립 색상, 딜레이 시간)
-  // colorWipe(strip.Color(255,   255,   255), 50); // Red
+  // colorWipe(strip.Color(30,   0,   255), 50); // Red
   // colorWipe(strip.Color(  0, 255,   0), 50); // Green
   // colorWipe(strip.Color(  0,   0, 255), 50); // Blue
   // colorWipe(strip.Color(255, 255, 255), 50); // White
@@ -45,7 +45,7 @@ void loop() {
   // theaterChase(strip.Color(  0,   0, 127), 50); // Blue, half brightness
 
   // // 전체 스트립에 색을 흐르는 무지개빛처럼 돌아가며 출력
-   rainbow(1);           
+   rainbow(5);           
   // // 위에 theaterChase효과를 무지개빛으로 출력
   // theaterChaseRainbow(50); 
   
