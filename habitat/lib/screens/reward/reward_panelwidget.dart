@@ -123,7 +123,7 @@ class Collectionitem extends StatelessWidget {
               offset: const Offset(0, 0),
             )
           ]),
-      child: Image.asset("lib/assets/images/wer.png"),
+      child: Image.asset("lib/assets/images/sunflower.png"),
     );
   }
 }

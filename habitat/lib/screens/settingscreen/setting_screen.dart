@@ -97,8 +97,6 @@ class _SettingScreenState extends State<SettingScreen> {
                 ),
               ),
               const settingbox(),
-
-              // Bluetooth(),
             ],
           ),
         ],

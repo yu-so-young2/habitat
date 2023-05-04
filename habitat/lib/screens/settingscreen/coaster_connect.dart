@@ -21,6 +21,9 @@ class _CoasterConnectState extends State<CoasterConnect> {
     super.initState();
   }
 
+  List drinkType = ['water', 'coffee', 'non-coffee'];
+  var selectedWeatherValue;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
