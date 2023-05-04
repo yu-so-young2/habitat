@@ -5,10 +5,12 @@
 #define LED_PIN 13     //네오픽셀에 신호를 줄 핀번호
 #define LED_COUNT 10  //아두이노에 연결된 네오픽셀의 개수
 
+Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_RGBW + NEO_KHZ800);
 ////---------압력센서---------////
 int before_drink=0;
 int now_drink=0;
 int total_drink=0;
+const int pressSensor = 26;
 
 ////---------타이머---------////
 #include "esp_system.h"
@@ -37,9 +39,9 @@ bool oldDeviceConnected = false;
 bool write_drink_SPIFFS = false;
 int cnt = 0;
 String receive_label = "";
-String receive_data = "";
-int goal = 0;
-int alarm = 0;
+int receive_data = 0;
+int Goal = -1;
+int Alarm = 0;
 String account = ""; // 계정
 
 BLEServer *pServer = NULL;
@@ -68,18 +70,18 @@ class MyCallbackHandler : public BLECharacteristicCallbacks {
         Serial.print(value[i]);
 
         // lable : data
-        if(value[i]==":")   isvalue=1;
+        if((char)value[i]==':')   isvalue=1;
         
         if(isvalue==0)
           receive_label = receive_label + (char)value[i];
         else if(isvalue==1)
-          receive_data = receive_data + (int)value[i];
+          receive_data = receive_data*10 + (int)(value[i]-'0');
       }
 
       if(receive_label=="goal")
-        goal = receive_data;
+        Goal = receive_data;
       if(receive_label=="alarm")
-        alarm = receive_data;
+        Alarm = receive_data;
       
       Serial.println();
     }
@@ -92,11 +94,11 @@ void setup() {
   ////---------NeoPixel---------////
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   strip.show();            // 네오픽셀에 빛을 출력하기 위한 것인데 여기서는 모든 네오픽셀을 OFF하기 위해서 사용한다.
-  strip.setBrightness(50); // 네오픽셀의 밝기 설정(최대 255까지 가능)
+  strip.setBrightness(200); // 네오픽셀의 밝기 설정(최대 255까지 가능)
   
   ////---------SPIFFS---------////
   Serial.println();
-  if (!SPIFFS.begin()) {
+  if (!SPIFFS.begin(true)) {
     Serial.println("Failed to mount file system");
     return;
   }
@@ -154,7 +156,7 @@ void setup() {
   ////---------타이머---------////
   Serial.println("running setup");
   timer = timerBegin(0, 80, true);                  //timer 0, div 80
-  timerAttachInterrupt(timer, &resetModule, true);  //attach callback
+  //timerAttachInterrupt(timer, &resetModule, true);  //attach callback
   timerAlarmWrite(timer, wdtTimeout * 1000, false); //set time in us
   timerAlarmEnable(timer);                          //enable interrupt
 
@@ -167,23 +169,30 @@ void loop() {
   // 센서값 받아오면 now_drink에 저장
   // now_drink = ???;
 
-  if(goal == total_drink) theaterChaseRainbow(50);
+  int value = analogRead(pressSensor);
+  Serial.println(value);
+  if(value >= 10)
+  {
+    total_drink++;
+    now_drink++;
+    Serial.print("total_drink");
+    Serial.println(total_drink);
+    Serial.print("goal");
+    Serial.println(Goal);
+  }
+  if(Goal == total_drink) rainbow(5);
   // 게이지 상승 
-  if(goal*0.1 == total_drink)    theaterChaseRainbow(1);
-  else if(goal*0.2 == total_drink)    theaterChaseRainbow(2);
-  else if(goal*0.3 == total_drink)    theaterChaseRainbow(3);
-  else if(goal*0.4 == total_drink)    theaterChaseRainbow(4);
-  else if(goal*0.5 == total_drink)    theaterChaseRainbow(5);
-  else if(goal*0.6 == total_drink)    theaterChaseRainbow(6);
-  else if(goal*0.7 == total_drink)    theaterChaseRainbow(7);
-  else if(goal*0.8 == total_drink)    theaterChaseRainbow(8);
-  else if(goal*0.9 == total_drink)    theaterChaseRainbow(9);
+  if(Goal*0.1 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 1);
+  else if(Goal*0.2 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 2);
+  else if(Goal*0.3 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 3);
+  else if(Goal*0.4 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 4);
+  else if(Goal*0.5 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 5);
+  else if(Goal*0.6 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 6);
+  else if(Goal*0.7 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 7);
+  else if(Goal*0.8 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 8);
+  else if(Goal*0.9 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 9);
 
   
-
-
-
-
 
 
 
@@ -200,7 +209,7 @@ void loop() {
       before_drink = now_drink;
     }
   }
-  // 이전에 연결한 기록이 있는 상태에서 견결이 끊기 상황
+  // 이전에 연결한 기록이 있는 상태에서 연결이 끊긴 상황
   if (!deviceConnected && oldDeviceConnected) {	// disconnecting
     delay(500); // give the bluetooth stack the chance to get things ready
     pServer->startAdvertising(); // restart advertising
@@ -238,7 +247,7 @@ void loop() {
       data2 =  (String)Min;
       data3 =  "\r\n";
       data = data1 + data2 + data3;
-      const char* Data = data.c_str();
+      
 
     }
     if(Min % 60 == 0 && Min != 0)
@@ -255,9 +264,10 @@ void loop() {
     if(before_drink != now_drink){
       String st = ":";
       String drink_st = (String)now_drink;
-      String d = Data + st + drink_st;
+      String d = data + st + drink_st;
+      const char* Data = d.c_str();
 
-      appendFile("/hello.txt", d);
+      appendFile("/hello.txt", Data);
 
       before_drink = now_drink;
     }
@@ -358,20 +368,21 @@ void deleteFile(const char * path){
 
 
 ////---------NeoPixel--------////
-// NeoPixel에 달린 LED를 각각 다른색으로 시작하여 다양한색으로 5번 반복한다
-void theaterChaseRainbow(int wait) {
-  int firstPixelHue = 0;
-  for (int a = 0; a < 5; a++) { 
-    for (int b = 0; b < 3; b++) {
-      strip.clear();         
-      for (int c = b; c < strip.numPixels(); c += 3) {        
-        int hue = firstPixelHue + c * 65536L / strip.numPixels();
-        uint32_t color = strip.gamma32(strip.ColorHSV(hue)); // hue -> RGB
-        strip.setPixelColor(c, color);
-      }
-      strip.show();                
-      delay(wait);                 
-      firstPixelHue += 65536 / 90; 
+void colorWipe(uint32_t color, int wait, int gauge) {
+  for (int i = 0; i < gauge; i++) { // For each pixel in strip...
+    strip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
+    strip.show();                          //  Update strip to match
+    delay(wait);                           //  Pause for a moment
+  }
+}
+
+void rainbow(int wait) {  
+  for (long firstPixelHue = 0; firstPixelHue < 2 * 65536; firstPixelHue += 256) {
+    for (int i = 0; i < strip.numPixels(); i++) { 
+      int pixelHue = firstPixelHue + (i * 65536L / strip.numPixels());      
+      strip.setPixelColor(i, strip.gamma32(strip.ColorHSV(pixelHue)));
     }
+    strip.show();
+    delay(wait);
   }
 }
