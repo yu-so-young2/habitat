@@ -19,6 +19,7 @@ class _SocialScreenState extends State<SocialScreen> {
     super.initState();
   }
 
+  final ScrollController scrollController = ScrollController();
   late var userCode = ApiFriendcode().getCode('asdf');
 
   onSubmitButton() {}
@@ -211,7 +212,9 @@ class _SocialScreenState extends State<SocialScreen> {
                   ),
                 ],
               ),
-              friendslistWidget()
+              friendslistWidget(
+                controller: scrollController,
+              )
             ],
           ),
         ),
@@ -225,11 +228,15 @@ class friendslistWidget extends StatelessWidget {
   final Future<List<FriendsListModel>> friendslistdata =
       ApiFriendsList().getFriendsList('asdf');
 
+  final ScrollController controller;
   void test() {
     debugPrint(friendslistdata.toString());
   }
 
-  friendslistWidget({super.key});
+  friendslistWidget({
+    super.key,
+    required this.controller,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -238,6 +245,9 @@ class friendslistWidget extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data != null) {
             return ListView.separated(
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                controller: controller,
                 itemBuilder: (context, index) {
                   return friendslist(
                       userKey: snapshot.data![index].userKey,
@@ -280,12 +290,14 @@ class friendslist extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(right: 20),
-            child: Icon(
-              Icons.local_florist_rounded,
-              size: 50,
-            ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: imgUrl != ''
+                ? Image.network(imgUrl)
+                : const Icon(
+                    Icons.local_florist_rounded,
+                    size: 50,
+                  ),
           ),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -306,6 +318,11 @@ class friendslist extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.add_alert_outlined),
+            iconSize: 30,
           )
         ],
       ),
