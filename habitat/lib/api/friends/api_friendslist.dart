@@ -13,7 +13,7 @@ class ApiFriendsList {
     Uri url = Uri.http(baseurl, 'friends/all', {'userKey': id});
     final response = await http.get(url);
     if (response.statusCode == 200) {
-      final List<dynamic> temp = jsonDecode(response.body);
+      final List<dynamic> temp = jsonDecode(utf8.decode(response.bodyBytes));
       for (var e in temp) {
         friendslist.add(FriendsListModel.fromJson(e));
       }

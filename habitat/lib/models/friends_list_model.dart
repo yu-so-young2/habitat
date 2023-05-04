@@ -5,8 +5,8 @@ class FriendsListModel {
   final String recent;
 
   FriendsListModel.fromJson(Map<String, dynamic> json)
-      : userKey = json['userKey'],
-        nickname = json['nickname'],
-        imgUrl = json['imgUrl'],
-        recent = json['recent'];
+      : userKey = json['userKey'] ?? '',
+        nickname = json['nickname'] ?? '',
+        imgUrl = json['imgUrl'] ?? '',
+        recent = json['recent'] ?? '';
 }
