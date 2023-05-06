@@ -1,32 +1,32 @@
 ////---------NeoPixel---------////
 #include <Adafruit_NeoPixel.h>
-
 //고정적으로 사용할 내용을 미리 선언
 #define LED_PIN 13     //네오픽셀에 신호를 줄 핀번호
 #define LED_COUNT 10  //아두이노에 연결된 네오픽셀의 개수
-
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_RGBW + NEO_KHZ800);
+
+
+
 ////---------압력센서---------////
 int before_drink=0;
 int now_drink=0;
 int total_drink=0;
 const int pressSensor = 26;
 
+
+
 ////---------타이머---------////
 #include "esp_system.h"
+unsigned long Sec, Min, Hour;
+unsigned long timeVal=0;
 
-const int wdtTimeout = 3000;  //time in ms to trigger the watchdog
-hw_timer_t *timer = NULL;
-int Min, Hour;
 
-void IRAM_ATTR resetModule() {
-  ets_printf("reboot\n");
-  esp_restart();
-}
 
 ////---------SPIFFS---------////
 #include "SPIFFS.h"
 String strValue = "";
+
+
 
 ////---------블루투스---------////
 #include <BLEDevice.h>
@@ -69,15 +69,14 @@ class MyCallbackHandler : public BLECharacteristicCallbacks {
       for (int i = 0; i < value.length(); i++) {
         Serial.print(value[i]);
 
-        // lable : data
+        // lable : data 
         if((char)value[i]==':')   isvalue=1;
-        
-        if(isvalue==0)
+        else if(isvalue==0)
           receive_label = receive_label + (char)value[i];
         else if(isvalue==1)
           receive_data = receive_data*10 + (int)(value[i]-'0');
       }
-
+      
       if(receive_label=="goal")
         Goal = receive_data;
       if(receive_label=="alarm")
@@ -87,6 +86,8 @@ class MyCallbackHandler : public BLECharacteristicCallbacks {
     }
   }
 };
+
+
 
 void setup() {
   Serial.begin(115200);
@@ -154,14 +155,11 @@ void setup() {
 
 
   ////---------타이머---------////
-  Serial.println("running setup");
-  timer = timerBegin(0, 80, true);                  //timer 0, div 80
-  //timerAttachInterrupt(timer, &resetModule, true);  //attach callback
-  timerAlarmWrite(timer, wdtTimeout * 1000, false); //set time in us
-  timerAlarmEnable(timer);                          //enable interrupt
-
+  timeVal = millis();
+  Sec = 0;
   Min = 0;
   Hour = 0;
+
 }
 
 void loop() {
@@ -169,17 +167,19 @@ void loop() {
   // 센서값 받아오면 now_drink에 저장
   // now_drink = ???;
 
-  int value = analogRead(pressSensor);
-  Serial.println(value);
-  if(value >= 10)
-  {
+  //int value = analogRead(pressSensor);
+  //Serial.println(value);
+  
     total_drink++;
     now_drink++;
     Serial.print("total_drink");
     Serial.println(total_drink);
     Serial.print("goal");
     Serial.println(Goal);
-  }
+  
+
+
+  ///---------NeoPixel---------////
   if(Goal == total_drink) rainbow(5);
   // 게이지 상승 
   if(Goal*0.1 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 1);
@@ -195,61 +195,73 @@ void loop() {
   
 
 
-
-
   ////---------블루투스---------////
   // 연결이 잘 되고 있는 상황
   // 데이터 갱신 후 notification
-  if(deviceConnected){	// notify changed value
-    if(before_drink != now_drink){
-      pCharacteristic->setValue((uint8_t*)strValue.c_str(), strValue.length());
-      pCharacteristic->notify();
-      cnt++;
-      delay(3);   // client가 올바르게 정보를 수산할 수 있도록 여유의 시간(레퍼런스에서 3ms)  
-      before_drink = now_drink;
-    }
+  if(deviceConnected){
+    // 물을 마셨음이 확인되면 플러터에 전송
+    // if(before_drink != now_drink){
+    //   pCharacteristic->setValue(now_drink);
+    //   pCharacteristic->notify();
+    //   delay(3);   // client가 올바르게 정보를 수산할 수 있도록 여유의 시간(레퍼런스에서 3ms)  
+    //   before_drink = now_drink;
+    // }
   }
   // 이전에 연결한 기록이 있는 상태에서 연결이 끊긴 상황
   if (!deviceConnected && oldDeviceConnected) {	// disconnecting
     delay(500); // give the bluetooth stack the chance to get things ready
-    pServer->startAdvertising(); // restart advertising
+    pServer->startAdvertising(); // 블루투스 재탐색 가능하도록 설정
     Serial.println("start advertising");
     oldDeviceConnected = deviceConnected;
+
+    // 블루투스가 끊긴 후 부터 메모리 시스템에 데이터 저장하도록 설정
     write_drink_SPIFFS = true;
     // 끊김 확인한 후에 메모리 초기화
     SPIFFS.format();
+    // 시간도 초기화
+    Sec = 0;
+    Min = 0;
+    Hour = 0;
   }
   // 연결은 되었지만 이전에 연결한 기록이 없는 상황
   // 연결된 기기에 데이터 전송
   if (deviceConnected && !oldDeviceConnected) {	// connecting
     oldDeviceConnected = deviceConnected;
+    
+    // 메모리에 데이터 저장 중단
     write_drink_SPIFFS = false;
+    
+    readFile("/hello.txt");
+
+    // 연결된 기기에 블루투스가 끊긴 후 부터 저장된 데이터 전송
     pCharacteristic->setValue((uint8_t*)strValue.c_str(), strValue.length());
     pCharacteristic->notify();
     delay(3);
   }
-  // 끊김 확인 이후
+
+  // 끊김 확인 이후 메모리 시스템이 데이터 저장
   if(!deviceConnected && write_drink_SPIFFS){
     ////---------타이머---------////
-    String data1 = "";
-    String data2 =  "";
-    String data3 =  "";
-    String data = "";
-    timerWrite(timer, 0); //reset timer (feed watchdog)
-    if((millis()/1000) % 60 == 0)
+    String colon = ":";
+    String lbracket = "[";
+    String rbracket = "]";
+    String sec_data = "";
+    String min_data = "";
+    String hour_data = "";
+    String newline = "\r\n";
+    String data  = "";
+
+
+    Sec++;
+
+    if(Sec % 60 == 0 && Sec != 0)
     {
+      Sec = 0;
       Min++;
       Serial.print("Min = ");
       Serial.println(Min);
-
-      // 파일 생성 및 데이터 쓰기
-      data1 = "min : ";
-      data2 =  (String)Min;
-      data3 =  "\r\n";
-      data = data1 + data2 + data3;
-      
-
     }
+
     if(Min % 60 == 0 && Min != 0)
     {
       Min = 0;
@@ -258,26 +270,25 @@ void loop() {
       Serial.println(Hour); 
     }
 
-    Serial.print("Time to = ");
-    Serial.println(millis()/1000); 
-    
+    // [h:m:s]수분섭취량
+    // 으로 데이터 저장
     if(before_drink != now_drink){
-      String st = ":";
+      hour_data = (String)Hour;
+      min_data = (String)Min;
+      sec_data = (String)Sec;
       String drink_st = (String)now_drink;
-      String d = data + st + drink_st;
-      const char* Data = d.c_str();
+      data = lbracket + hour_data + colon + min_data + colon + sec_data + rbracket + drink_st + newline;
+      const char* Data = data.c_str();
 
       appendFile("/hello.txt", Data);
 
       before_drink = now_drink;
     }
-    
-  }
 
-  delay(1000); //simulate work
+  }
+    delay(1000);
   
 }
-
 
 
 
@@ -306,6 +317,7 @@ void readFile(const char * path){
     return;
   }
   
+  // 문자열 초기화
   strValue="";
   Serial.println("read from file:");
   while(file.available()){
