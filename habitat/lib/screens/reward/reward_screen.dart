@@ -113,8 +113,8 @@ class _RewardScreenState extends State<RewardScreen> {
                 children: [
                   Image.asset(
                     isdata
-                        // ? 'lib/assets/images/flowers/${flowerExpStatus[0].flowerKey}/${flowerExpStatus[0].lv}.png'
-                        ? 'lib/assets/images/flowers/7/2.png'
+                        ? 'lib/assets/images/flowers/${flowerExpStatus[0].flowerKey}/${flowerExpStatus[0].lv}.png'
+                        // ? 'lib/assets/images/flowers/7/2.png'
                         : 'lib/assets/images/sunflower.png',
                     scale: 4.8,
                   ),
@@ -137,7 +137,7 @@ class _RewardScreenState extends State<RewardScreen> {
                         roundedEdges: const Radius.circular(14),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(top: 10),
+                        padding: const EdgeInsets.only(top: 8),
                         child: Text(
                           "${expPercent.toStringAsFixed(1)}%",
                           style: const TextStyle(
@@ -223,7 +223,9 @@ class _RewardScreenState extends State<RewardScreen> {
                     //       color: Colors.grey[400]),
                     // ),
                     Text(
-                      isdata ? flowerStatus[0].getCondition : "not yet",
+                      isdata
+                          ? "획득조건 : ${flowerStatus[0].getCondition}"
+                          : "not yet",
                       style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
