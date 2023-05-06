@@ -38,4 +38,14 @@ class ApiFriendRequest {
       debugPrint('수락');
     }
   }
+
+  void putFriendRequest(int requestCode, String id) async {
+    Uri url = Uri.http(baseurl, 'friends/request/cancel', {'userKey': id});
+    http.Response response = await http.post(url,
+        body: jsonEncode({'friendRequestKey': requestCode}));
+
+    if (response.statusCode == 200) {
+      debugPrint('거절');
+    }
+  }
 }

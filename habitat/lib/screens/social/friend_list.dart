@@ -249,8 +249,14 @@ class requestfriendlist extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child:
-                      ElevatedButton(onPressed: () {}, child: const Text('거절')),
+                  child: ElevatedButton(
+                      onPressed: () {
+                        ApiFriendRequest()
+                            .putFriendRequest(friendRequestKey, userKey);
+                        debugPrint('거절보냄');
+                        delete(friendRequestKey);
+                      },
+                      child: const Text('거절')),
                 ),
               ],
             ),

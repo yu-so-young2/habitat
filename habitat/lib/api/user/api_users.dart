@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:habitat/api/base_url.dart';
 import 'package:habitat/models/users_model.dart';
 import 'package:http/http.dart' as http;
@@ -35,5 +36,21 @@ class ApiUsers {
     }
 
     return getuserinfodata;
+  }
+
+  void changeUserNickname(String nickname, String userKey) async {
+    Uri url = Uri.http(baseurl, 'users/modify', {'userKey': userKey});
+
+    final response = await http.patch(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        'friendCode': nickname,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      debugPrint('닉네임 변경 성공');
+    }
   }
 }
