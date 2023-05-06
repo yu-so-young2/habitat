@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:habitat/api/friends/api_friendcode.dart';
+import 'package:habitat/api/friends/api_sendrequestcode.dart';
 import 'package:habitat/screens/social/friend_list.dart';
 import 'package:habitat/widgets/dock_bar.dart';
 
@@ -20,6 +21,8 @@ class _SocialScreenState extends State<SocialScreen> {
 
   final ScrollController scrollController = ScrollController();
   late var userCode = ApiFriendcode().getCode('asdf');
+
+  TextEditingController tec = TextEditingController();
 
   onSubmitButton() {}
 
@@ -104,16 +107,19 @@ class _SocialScreenState extends State<SocialScreen> {
                 padding: const EdgeInsets.all(10),
                 child: Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: TextField(
-                        decoration: InputDecoration(
+                        controller: tec,
+                        decoration: const InputDecoration(
                             hintText: '친구 코드를 입력하세요.', hintStyle: TextStyle()),
                       ),
                     ),
                     ElevatedButton(
                         onPressed: onSubmitButton, child: const Text('확인')),
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        ApiSendRequestCode().postRequestCode(tec.text, 'asdf');
+                      },
                       icon: Image.asset(
                         'lib/assets/images/kakao.png',
                         fit: BoxFit.cover,
