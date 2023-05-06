@@ -27,3 +27,15 @@ class FlowerModel {
         story = json['story'],
         getCondition = json['getCondition'];
 }
+
+class FlowerCollectionModel {
+  final int flowerKey, userStatus;
+  final String name, story, getCondition;
+
+  FlowerCollectionModel.fromJson(Map<String, dynamic> json)
+      : flowerKey = json['flowerKey'],
+        name = json['name'],
+        story = json['story'],
+        getCondition = json['getCondition'],
+        userStatus = json['userStatus'];
+}
