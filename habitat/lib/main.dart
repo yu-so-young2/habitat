@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:habitat/screens/loading/loading_screen.dart';
 import 'package:habitat/screens/main/main_screen.dart';
+import 'package:habitat/screens/onboarding/onboarding_screen.dart';
 import 'package:habitat/screens/report_screen.dart';
 import 'package:habitat/screens/reward/reward_screen.dart';
 import 'package:habitat/screens/settingscreen/setting_screen.dart';
@@ -19,7 +20,8 @@ void main() {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => const MainScreen(),
+        '/': (context) => const OnboardingScreen(),
+        '/main': (context) => const MainScreen(),
         '/report': (context) => const ReportScreen(),
         '/reward': (context) => const RewardScreen(),
         '/social': (context) => const SocialScreen(),
