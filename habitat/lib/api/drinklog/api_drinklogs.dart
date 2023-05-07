@@ -94,4 +94,26 @@ class ApiDrinkLogs {
       debugPrint("전송 성공");
     }
   }
+
+  // 유저가 마신 물, 음료를 코스터가 자동 기록
+  void postAddAutoDrinkLog(int drink, String drinkType, String userKey) async {
+    Uri url = Uri.http(
+      baseurl,
+      'drinkLogs/auto',
+      {
+        'userKey': userKey,
+      },
+    );
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        'drink': drink,
+        'drinkType': drinkType,
+      }),
+    );
+    if (response.statusCode == 200) {
+      debugPrint("전송 성공");
+    }
+  }
 }

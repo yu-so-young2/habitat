@@ -130,7 +130,7 @@ class _CoasterLinkState extends State<CoasterLink> {
 
                 c.value.listen((value) {
                   // 데이터 읽기 처리!
-                  print('받은 데이터 : ${c.uuid}: $value');
+                  debugPrint('받은 데이터 : ${c.uuid}: $value');
                   // print("리드에 뭐가 들었나 ${c.read().toString()}");
                   setState(() {
                     // 받은 데이터 저장 화면 표시용
