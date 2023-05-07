@@ -3,9 +3,12 @@ import 'package:get/get.dart';
 
 class CoasterController extends GetxController {
   FlutterBluePlus flutterBlue = FlutterBluePlus.instance;
-
+  // 연결상태 저장용
+  BluetoothDeviceState deviceState = BluetoothDeviceState.disconnected;
   bool isScanning = false;
+
   RxList scanResultList = [].obs;
+  Map<String, List<int>> notifyDatas = {};
 
   void scanForDevices() async {
     // 스캔 결과 초기화
