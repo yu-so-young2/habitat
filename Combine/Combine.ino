@@ -73,7 +73,7 @@ class MyCallbackHandler : public BLECharacteristicCallbacks {
         if((char)value[i]==':')   isvalue=1;
         else if(isvalue==0)
           receive_label = receive_label + (char)value[i];
-        else if(isvalue==1)
+        else if(isvalue==1 && (value[i]>='0' && value[i]<='9'))
           receive_data = receive_data*10 + (int)(value[i]-'0');
       }
       
