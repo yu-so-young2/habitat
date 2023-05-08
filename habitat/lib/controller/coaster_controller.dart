@@ -9,7 +9,7 @@ class CoasterController extends GetxController {
   // 연결상태 저장용
   BluetoothDeviceState deviceState = BluetoothDeviceState.disconnected;
 
-  RxString coasterStatus = '대기중'.obs;
+  RxString coasterStatus = '연결 대기중'.obs;
   RxString coasterData = '데이터 아무것도 없다'.obs;
   late BluetoothDevice device;
 
