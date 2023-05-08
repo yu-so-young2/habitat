@@ -161,6 +161,11 @@ class _MainScreenState extends State<MainScreen> {
                 },
               ),
               const WaterLogInputModal(),
+              ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/bluetooth');
+                  },
+                  child: const Text("코스터연결")),
             ],
           ),
         ),

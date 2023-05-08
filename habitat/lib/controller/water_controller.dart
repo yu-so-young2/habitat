@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -24,6 +25,8 @@ class WaterController extends GetxController {
   getStorageData() async {
     var storageTime = await storage.read(key: 'time');
     var storageWater = await storage.read(key: 'water');
+
+    debugPrint(water.value.toString());
 
     if (time == storageTime) {
       if (storageWater != null) {

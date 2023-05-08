@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:habitat/screens/coaster/coaster_connect_screen.dart';
 import 'package:habitat/screens/loading/loading_screen.dart';
 import 'package:habitat/screens/main/main_screen.dart';
 import 'package:habitat/screens/report_screen.dart';
@@ -24,7 +25,8 @@ void main() {
         '/reward': (context) => const RewardScreen(),
         '/social': (context) => const SocialScreen(),
         '/setting': (context) => const SettingScreen(),
-        '/loading': (context) => const LoadingScreen()
+        '/loading': (context) => const LoadingScreen(),
+        '/bluetooth': (context) => CoasterConnectScreen(),
       },
     ),
   );
