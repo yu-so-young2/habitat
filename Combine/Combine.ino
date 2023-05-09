@@ -17,7 +17,7 @@ const int pressSensor = 26;
 
 ////---------타이머---------////
 #include "esp_system.h"
-unsigned long Sec, Min, Hour;
+unsigned long Sec, Min, Hour, time5sec, time5min;
 unsigned long timeVal=0;
 
 
@@ -43,6 +43,7 @@ int receive_data = 0;
 int Goal = -1;
 int Alarm = 0;
 String account = ""; // 계정
+
 
 BLEServer *pServer = NULL;
 BLEService *pService = NULL;
@@ -159,7 +160,8 @@ void setup() {
   Sec = 0;
   Min = 0;
   Hour = 0;
-
+  time5sec = 0;
+  time5min = 0;
 }
 
 void loop() {
@@ -193,14 +195,18 @@ void loop() {
   else if(Goal*0.9 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 9);
 
   
-
+  time5sec++;
+  if(time5sec==60){
+    time5sec=0;
+    time5min++;
+  }
 
   ////---------블루투스---------////
   // 연결이 잘 되고 있는 상황
   // 데이터 갱신 후 notification
   if(deviceConnected){
     // 물을 마셨음이 확인되면 플러터에 전송
-    if(before_drink != now_drink){
+    if(before_drink != now_drink && time5min%5==0){
       pCharacteristic->setValue(now_drink);
       pCharacteristic->notify();
       delay(3);   // client가 올바르게 정보를 수산할 수 있도록 여유의 시간(레퍼런스에서 3ms)  
