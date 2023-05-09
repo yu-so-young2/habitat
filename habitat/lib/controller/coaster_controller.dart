@@ -3,11 +3,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
+import 'package:habitat/controller/water_controller.dart';
 
 class CoasterController extends GetxController {
   FlutterBluePlus flutterBlue = FlutterBluePlus.instance;
   // 연결상태 저장용
   BluetoothDeviceState deviceState = BluetoothDeviceState.disconnected;
+  // final WaterController waterController = WaterController();
 
   RxString coasterStatus = '대기중'.obs;
   RxString coasterData = '데이터 아무것도 없다'.obs;
@@ -48,31 +50,32 @@ class CoasterController extends GetxController {
     ).then((data) async {
       if (returnValue) {
         List<BluetoothService> bleService = await device.discoverServices();
+        Map<String, String> notifyDatas = {};
 
         for (BluetoothService service in bleService) {
           for (BluetoothCharacteristic c in service.characteristics) {
             await device.requestMtu(223);
-
-            Map<String, List<int>> notifyDatas = {};
+            // WaterController().drinkwater(100);
 
             if (!c.isNotifying) {
               try {
                 await c.setNotifyValue(true);
                 // 받을 데이터 변수 Map 형식으로 키 생성
-                notifyDatas[c.uuid.toString()] = List.empty();
+                notifyDatas[c.uuid.toString()] = '';
 
                 // 데이터 읽기 처리!
                 c.value.listen((value) {
-                  debugPrint('받은 데이터 : ${c.uuid}: $value');
+                  debugPrint('받은 데이터 : ${c.uuid} : $value');
 
                   // 받은 데이터 저장 화면 표시용
-                  notifyDatas[c.uuid.toString()] = value;
+                  notifyDatas[c.uuid.toString()] = ascii.decode(value);
 
+                  // notify key가 있다면
                   if (notifyDatas.containsKey(c.uuid.toString())) {
                     // notify 데이터가 존재한다면
                     if (notifyDatas[c.uuid.toString()]!.isNotEmpty) {
                       coasterData.value =
-                          ascii.decode(notifyDatas[c.uuid.toString()]!);
+                          bluetoothDataParsing(notifyDatas[c.uuid.toString()]!);
                     }
                   }
                 });
@@ -84,5 +87,17 @@ class CoasterController extends GetxController {
         }
       }
     });
+  }
+
+  String bluetoothDataParsing(String str) {
+    List splitData = str.split(RegExp(r'[w,c,d]'));
+    int time = int.parse(splitData[0]);
+    String type = splitData[1];
+    int water = int.parse(splitData[2]);
+    debugPrint("시간 : $time, 타입 : $type, 양 : $water");
+
+    WaterController().drinkwater(water);
+
+    return "시간 : $time, 타입 : $type, 양 : $water";
   }
 }
