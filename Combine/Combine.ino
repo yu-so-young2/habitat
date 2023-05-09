@@ -8,11 +8,23 @@ Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_RGBW + NEO_KHZ800);
 
 
 ////---------압력센서---------////
-int before_drink=0;
+int init_drink=0;
+int before_drink=-1;
 int now_drink=0;
 int total_drink=0;
-const int pressSensor = 26;
+const int pressSensor = 26;    // SIG를 26번 핀에 연결
 
+
+////---------터치센서---------////
+const int watertouch = 14;     // SIG를 14번 핀에 연결
+const int coffeetouch = 15;     // SIG를 15번 핀에 연결
+const int noncoffeetouch = 16;     // SIG를 16번 핀에 연결
+
+int watercnt=0;
+int coffeecnt=0;
+int noncoffeecnt=0;
+
+String drink_type="w";
 
 
 ////---------타이머---------////
@@ -25,7 +37,6 @@ unsigned long timeVal=0;
 ////---------SPIFFS---------////
 #include "SPIFFS.h"
 String strValue = "";
-
 
 
 ////---------블루투스---------////
@@ -98,23 +109,28 @@ void setup() {
   strip.show();            // 네오픽셀에 빛을 출력하기 위한 것인데 여기서는 모든 네오픽셀을 OFF하기 위해서 사용한다.
   strip.setBrightness(200); // 네오픽셀의 밝기 설정(최대 255까지 가능)
   
+
   ////---------SPIFFS---------////
   Serial.println();
   if (!SPIFFS.begin(true)) {
     Serial.println("Failed to mount file system");
     return;
   }
-
   SPIFFS.format();
   listDir("/"); 
   writeFile("/hello.txt", "");
 
 
+  ////---------터치센서---------////
+  pinMode (watertouch, INPUT);     // 터치센서 신호값을 입력으로 설정
+  pinMode (coffeetouch, INPUT);
+  pinMode (noncoffeetouch, INPUT);
+
 
   ////---------블루투스---------////
   Serial.println("Starting BLE...");
   // BLE 장치 이름
-  BLEDevice::init("률류");
+  BLEDevice::init("랼랴");
   // BLE 장치를 BLE 서버로 설정
   pServer = BLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());
@@ -167,18 +183,66 @@ void setup() {
 void loop() {
   ////--------압력센서--------////
   // 센서값 받아오면 now_drink에 저장
-  // now_drink = ???;
+  int presssensor_value = analogRead(pressSensor);
+  changeLiter(presssensor_value);
 
   //int value = analogRead(pressSensor);
   //Serial.println(value);
+  total_drink++;
+  now_drink++;
+  Serial.print("total_drink");
+  Serial.println(total_drink);
+  Serial.print("goal");
+  Serial.println(Goal);
   
-    total_drink++;
-    now_drink++;
-    Serial.print("total_drink");
-    Serial.println(total_drink);
-    Serial.print("goal");
-    Serial.println(Goal);
-  
+
+
+  ////--------터치센서---------////
+  int touch_water_state = digitalRead (watertouch);   // 터치센서의 입력값을 state라는 변수에 저장
+  int touch_coffee_state = digitalRead (coffeetouch);
+  int touch_noncoffee_state = digitalRead (noncoffeetouch);
+  // 물 버튼 high
+  if(touch_water_state==HIGH) watercnt++;
+  if(touch_coffee_state==HIGH) coffeecnt++;
+  if(touch_noncoffee_state==HIGH) noncoffeecnt++;
+
+  // 영점조절  
+  if(watercnt>=2)
+  {
+    init_drink = now_drink;
+    watercnt=0;
+    // led색상 변경
+    Serial.println("water");
+    drink_type = "w";
+    colorWipe(strip.Color(0, 0, 255), 50, 10); // blue
+    delay(1000);
+    strip.clear();
+    strip.show();
+  }
+  if(coffeecnt>=2)
+  {
+    init_drink = now_drink;
+    coffeecnt=0;
+    // led색상 변경
+    Serial.println("coffee");
+    drink_type = "c";
+    colorWipe(strip.Color(255, 0, 0), 50, 10); //red
+    delay(1000);
+    strip.clear();
+    strip.show();
+  }
+  if(noncoffeecnt>=2)
+  {
+    init_drink = now_drink;
+    noncoffeecnt=0;
+    // led색상 변경
+    Serial.println("noncoffee");
+    drink_type = "d";
+    colorWipe(strip.Color(0, 255, 0), 50, 10); //green
+    delay(1000);
+    strip.clear();
+    strip.show();
+  }
 
 
   ///---------NeoPixel---------////
@@ -206,8 +270,13 @@ void loop() {
   // 데이터 갱신 후 notification
   if(deviceConnected){
     // 물을 마셨음이 확인되면 플러터에 전송
-    if(before_drink != now_drink && time5min%5==0){
-      pCharacteristic->setValue(now_drink);
+    if(before_drink != now_drink && time5min%5==0 && time5sec == 0){
+      String min_data = (String)time5min;
+      String stst = (String)now_drink;
+      String data = min_data + drink_type + stst;
+      const char* Data = data.c_str();
+
+      pCharacteristic->setValue(Data);
       pCharacteristic->notify();
       delay(3);   // client가 올바르게 정보를 수산할 수 있도록 여유의 시간(레퍼런스에서 3ms)  
       before_drink = now_drink;
@@ -280,7 +349,13 @@ void loop() {
   
 }
 
+////---------압력센서--------////
+void changeLiter(int drink){
+  now_drink = init_drink - drink;
 
+  /// 값 변경
+
+}
 
 ////---------SPIFFS---------////
 
