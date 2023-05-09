@@ -11,7 +11,7 @@ class CoasterController extends GetxController {
   BluetoothDeviceState deviceState = BluetoothDeviceState.disconnected;
   // final WaterController waterController = WaterController();
 
-  RxString coasterStatus = '대기중'.obs;
+  RxString coasterStatus = '연결 대기중'.obs;
   RxString coasterData = '데이터 아무것도 없다'.obs;
   late BluetoothDevice device;
 
