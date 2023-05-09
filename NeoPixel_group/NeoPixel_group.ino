@@ -24,7 +24,8 @@ void setup() {
   Serial.begin(115200);
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   strip.show();            // 네오픽셀에 빛을 출력하기 위한 것인데 여기서는 모든 네오픽셀을 OFF하기 위해서 사용한다.
-  strip.setBrightness(200); // 네오픽셀의 밝기 설정(최대 255까지 가능)
+  strip.setBrightness(50); // 네오픽셀의 밝기 설정(최대 255까지 가능)
+  rainbow(10); 
 }
 
 void loop() {
@@ -45,7 +46,7 @@ void loop() {
   // theaterChase(strip.Color(  0,   0, 127), 50); // Blue, half brightness
 
   // // 전체 스트립에 색을 흐르는 무지개빛처럼 돌아가며 출력
-   rainbow(5);           
+             
   // // 위에 theaterChase효과를 무지개빛으로 출력
   // theaterChaseRainbow(50); 
   
@@ -76,14 +77,18 @@ void theaterChase(uint32_t color, int wait) {
 }
 // 코스터에 사용할 함수
 void rainbow(int wait) {  
-  for (long firstPixelHue = 0; firstPixelHue < 5 * 65536; firstPixelHue += 256) {
+  for (long firstPixelHue = 0; firstPixelHue < 3*65536; firstPixelHue += 256) {
     for (int i = 0; i < strip.numPixels(); i++) { 
       int pixelHue = firstPixelHue + (i * 65536L / strip.numPixels());      
       strip.setPixelColor(i, strip.gamma32(strip.ColorHSV(pixelHue)));
     }
     strip.show();
     delay(wait);
+  
   }
+    delay(3000);
+    strip.clear();
+    strip.show();
 }
 
 void theaterChaseRainbow(int wait) {
