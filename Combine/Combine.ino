@@ -200,12 +200,12 @@ void loop() {
   // 데이터 갱신 후 notification
   if(deviceConnected){
     // 물을 마셨음이 확인되면 플러터에 전송
-    // if(before_drink != now_drink){
-    //   pCharacteristic->setValue(now_drink);
-    //   pCharacteristic->notify();
-    //   delay(3);   // client가 올바르게 정보를 수산할 수 있도록 여유의 시간(레퍼런스에서 3ms)  
-    //   before_drink = now_drink;
-    // }
+    if(before_drink != now_drink){
+      pCharacteristic->setValue(now_drink);
+      pCharacteristic->notify();
+      delay(3);   // client가 올바르게 정보를 수산할 수 있도록 여유의 시간(레퍼런스에서 3ms)  
+      before_drink = now_drink;
+    }
   }
   // 이전에 연결한 기록이 있는 상태에서 연결이 끊긴 상황
   if (!deviceConnected && oldDeviceConnected) {	// disconnecting
@@ -221,7 +221,6 @@ void loop() {
     // 시간도 초기화
     Sec = 0;
     Min = 0;
-    Hour = 0;
   }
   // 연결은 되었지만 이전에 연결한 기록이 없는 상황
   // 연결된 기기에 데이터 전송
@@ -236,18 +235,13 @@ void loop() {
     // 연결된 기기에 블루투스가 끊긴 후 부터 저장된 데이터 전송
     pCharacteristic->setValue((uint8_t*)strValue.c_str(), strValue.length());
     pCharacteristic->notify();
-    delay(3);
+    delay(1000);
   }
 
   // 끊김 확인 이후 메모리 시스템이 데이터 저장
   if(!deviceConnected && write_drink_SPIFFS){
     ////---------타이머---------////
-    String colon = ":";
-    String lbracket = "[";
-    String rbracket = "]";
-    String sec_data = "";
     String min_data = "";
-    String hour_data = "";
     String newline = "\r\n";
     String data  = "";
 
@@ -262,22 +256,12 @@ void loop() {
       Serial.println(Min);
     }
 
-    if(Min % 60 == 0 && Min != 0)
-    {
-      Min = 0;
-      Hour++;
-      Serial.print("Hour = ");
-      Serial.println(Hour); 
-    }
-
-    // [h:m:s]수분섭취량
+    // m음료타입수분섭취량
     // 으로 데이터 저장
     if(before_drink != now_drink){
-      hour_data = (String)Hour;
       min_data = (String)Min;
-      sec_data = (String)Sec;
       String drink_st = (String)now_drink;
-      data = lbracket + hour_data + colon + min_data + colon + sec_data + rbracket + drink_st + newline;
+      data = min_data + 'w' + drink_st + newline;
       const char* Data = data.c_str();
 
       appendFile("/hello.txt", Data);
