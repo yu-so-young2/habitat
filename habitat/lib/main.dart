@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk_auth.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:habitat/screens/loading/loading_screen.dart';
@@ -13,6 +14,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  KakaoSdk.init(nativeAppKey: '033ae651eac2b2c9d95f492284197bdb');
   runApp(
     MaterialApp(
       title: "habit@",
