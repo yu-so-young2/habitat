@@ -8,16 +8,28 @@ Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_RGBW + NEO_KHZ800);
 
 
 ////---------압력센서---------////
-int before_drink=0;
+int init_drink=0;
+int before_drink=-1;
 int now_drink=0;
 int total_drink=0;
-const int pressSensor = 26;
+const int pressSensor = 26;    // SIG를 26번 핀에 연결
 
+
+////---------터치센서---------////
+const int watertouch = 14;     // SIG를 14번 핀에 연결
+const int coffeetouch = 15;     // SIG를 15번 핀에 연결
+const int noncoffeetouch = 16;     // SIG를 16번 핀에 연결
+
+int watercnt=0;
+int coffeecnt=0;
+int noncoffeecnt=0;
+
+String drink_type="w";
 
 
 ////---------타이머---------////
 #include "esp_system.h"
-unsigned long Sec, Min, Hour;
+unsigned long Sec, Min, Hour, time5sec, time5min;
 unsigned long timeVal=0;
 
 
@@ -25,7 +37,6 @@ unsigned long timeVal=0;
 ////---------SPIFFS---------////
 #include "SPIFFS.h"
 String strValue = "";
-
 
 
 ////---------블루투스---------////
@@ -43,6 +54,7 @@ int receive_data = 0;
 int Goal = -1;
 int Alarm = 0;
 String account = ""; // 계정
+
 
 BLEServer *pServer = NULL;
 BLEService *pService = NULL;
@@ -97,23 +109,28 @@ void setup() {
   strip.show();            // 네오픽셀에 빛을 출력하기 위한 것인데 여기서는 모든 네오픽셀을 OFF하기 위해서 사용한다.
   strip.setBrightness(200); // 네오픽셀의 밝기 설정(최대 255까지 가능)
   
+
   ////---------SPIFFS---------////
   Serial.println();
   if (!SPIFFS.begin(true)) {
     Serial.println("Failed to mount file system");
     return;
   }
-
   SPIFFS.format();
   listDir("/"); 
   writeFile("/hello.txt", "");
 
 
+  ////---------터치센서---------////
+  pinMode (watertouch, INPUT);     // 터치센서 신호값을 입력으로 설정
+  pinMode (coffeetouch, INPUT);
+  pinMode (noncoffeetouch, INPUT);
+
 
   ////---------블루투스---------////
   Serial.println("Starting BLE...");
   // BLE 장치 이름
-  BLEDevice::init("률류");
+  BLEDevice::init("랼랴");
   // BLE 장치를 BLE 서버로 설정
   pServer = BLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());
@@ -159,24 +176,73 @@ void setup() {
   Sec = 0;
   Min = 0;
   Hour = 0;
-
+  time5sec = 0;
+  time5min = 0;
 }
 
 void loop() {
   ////--------압력센서--------////
   // 센서값 받아오면 now_drink에 저장
-  // now_drink = ???;
+  int presssensor_value = analogRead(pressSensor);
+  changeLiter(presssensor_value);
 
   //int value = analogRead(pressSensor);
   //Serial.println(value);
+  total_drink++;
+  now_drink++;
+  Serial.print("total_drink");
+  Serial.println(total_drink);
+  Serial.print("goal");
+  Serial.println(Goal);
   
-    total_drink++;
-    now_drink++;
-    Serial.print("total_drink");
-    Serial.println(total_drink);
-    Serial.print("goal");
-    Serial.println(Goal);
-  
+
+
+  ////--------터치센서---------////
+  int touch_water_state = digitalRead (watertouch);   // 터치센서의 입력값을 state라는 변수에 저장
+  int touch_coffee_state = digitalRead (coffeetouch);
+  int touch_noncoffee_state = digitalRead (noncoffeetouch);
+  // 물 버튼 high
+  if(touch_water_state==HIGH) watercnt++;
+  if(touch_coffee_state==HIGH) coffeecnt++;
+  if(touch_noncoffee_state==HIGH) noncoffeecnt++;
+
+  // 영점조절  
+  if(watercnt>=2)
+  {
+    init_drink = now_drink;
+    watercnt=0;
+    // led색상 변경
+    Serial.println("water");
+    drink_type = "w";
+    colorWipe(strip.Color(0, 0, 255), 50, 10); // blue
+    delay(1000);
+    strip.clear();
+    strip.show();
+  }
+  if(coffeecnt>=2)
+  {
+    init_drink = now_drink;
+    coffeecnt=0;
+    // led색상 변경
+    Serial.println("coffee");
+    drink_type = "c";
+    colorWipe(strip.Color(255, 0, 0), 50, 10); //red
+    delay(1000);
+    strip.clear();
+    strip.show();
+  }
+  if(noncoffeecnt>=2)
+  {
+    init_drink = now_drink;
+    noncoffeecnt=0;
+    // led색상 변경
+    Serial.println("noncoffee");
+    drink_type = "d";
+    colorWipe(strip.Color(0, 255, 0), 50, 10); //green
+    delay(1000);
+    strip.clear();
+    strip.show();
+  }
 
 
   ///---------NeoPixel---------////
@@ -193,19 +259,28 @@ void loop() {
   else if(Goal*0.9 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 9);
 
   
-
+  time5sec++;
+  if(time5sec==60){
+    time5sec=0;
+    time5min++;
+  }
 
   ////---------블루투스---------////
   // 연결이 잘 되고 있는 상황
   // 데이터 갱신 후 notification
   if(deviceConnected){
     // 물을 마셨음이 확인되면 플러터에 전송
-    // if(before_drink != now_drink){
-    //   pCharacteristic->setValue(now_drink);
-    //   pCharacteristic->notify();
-    //   delay(3);   // client가 올바르게 정보를 수산할 수 있도록 여유의 시간(레퍼런스에서 3ms)  
-    //   before_drink = now_drink;
-    // }
+    if(before_drink != now_drink && time5min%5==0 && time5sec == 0){
+      String min_data = (String)time5min;
+      String stst = (String)now_drink;
+      String data = min_data + drink_type + stst;
+      const char* Data = data.c_str();
+
+      pCharacteristic->setValue(Data);
+      pCharacteristic->notify();
+      delay(3);   // client가 올바르게 정보를 수산할 수 있도록 여유의 시간(레퍼런스에서 3ms)  
+      before_drink = now_drink;
+    }
   }
   // 이전에 연결한 기록이 있는 상태에서 연결이 끊긴 상황
   if (!deviceConnected && oldDeviceConnected) {	// disconnecting
@@ -233,21 +308,14 @@ void loop() {
     readFile("/hello.txt");
 
     // 연결된 기기에 블루투스가 끊긴 후 부터 저장된 데이터 전송
-    // 바로 전송하니까 데이터를 받지를 못함
-    delay(5000);
-    pCharacteristic->setValue("testtest1234"); 
-    pCharacteristic->notify();
     pCharacteristic->setValue((uint8_t*)strValue.c_str(), strValue.length());
     pCharacteristic->notify();
-    delay(3);
+    delay(1000);
   }
 
   // 끊김 확인 이후 메모리 시스템이 데이터 저장
   if(!deviceConnected && write_drink_SPIFFS){
     ////---------타이머---------////
-    String colon = ":";
-    String lbracket = "[";
-    String rbracket = "]";
     String min_data = "";
     String newline = "\r\n";
     String data  = "";
@@ -263,8 +331,7 @@ void loop() {
       Serial.println(Min);
     }
 
-
-    // m타입수분섭취량
+    // m음료타입수분섭취량
     // 으로 데이터 저장
     if(before_drink != now_drink){
       min_data = (String)Min;
@@ -282,7 +349,13 @@ void loop() {
   
 }
 
+////---------압력센서--------////
+void changeLiter(int drink){
+  now_drink = init_drink - drink;
 
+  /// 값 변경
+
+}
 
 ////---------SPIFFS---------////
 
