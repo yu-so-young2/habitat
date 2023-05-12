@@ -6,7 +6,6 @@
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_RGBW + NEO_KHZ800);
 
 
-
 ////---------압력센서---------////
 int init_drink=0;
 int before_drink=-1;
@@ -49,7 +48,7 @@ void deleteFile(const char * path);
 
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
-bool write_drink_SPIFFS = false;
+
 int cnt = 0;
 
 int Goal = -1;
@@ -81,6 +80,7 @@ class MyCallbackHandler : public BLECharacteristicCallbacks {
     int isvalue = 0;
     if (value.length() > 0) {
       Goal=0;
+      user_exist = 1;
       Serial.print("Receive");
       Serial.print("Received value: ");
       for (int i = 0; i < value.length(); i++) {
@@ -110,7 +110,7 @@ void setup() {
   Serial.begin(115200);
 
   ////--------목표설정, 알람여부 데이터---------////
-  infoFile("/user_info.txt");
+  
 
   ////---------NeoPixel---------////
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
@@ -126,6 +126,7 @@ void setup() {
   }
   //SPIFFS.format();
   listDir("/"); 
+  infoFile("/user_info.txt");
   deleteFile("/drink_log.txt");
   writeFile("/drink_log.txt", "");
 
@@ -284,7 +285,7 @@ void loop() {
     // 데이터 갱신 후 notification
     if(deviceConnected){
       // 물을 마셨음이 확인되면 플러터에 전송
-      if(before_drink != now_drink && time5min%5==0 && time5sec == 0){
+      if(before_drink != now_drink && time5min%3==0 && time5sec == 0){
         String min_data = (String)time5min;
         String stst = (String)now_drink;
         String data = min_data + drink_type + stst;
@@ -304,7 +305,6 @@ void loop() {
       oldDeviceConnected = deviceConnected;
 
       // 블루투스가 끊긴 후 부터 메모리 시스템에 데이터 저장하도록 설정
-      write_drink_SPIFFS = true;
       // 끊김 확인한 후에 메모리 초기화
       deleteFile("/drink_log.txt");
       // 시간도 초기화
@@ -317,18 +317,17 @@ void loop() {
       oldDeviceConnected = deviceConnected;
       
       // 메모리에 데이터 저장 중단
-      write_drink_SPIFFS = false;
       
       readFile("/drink_log.txt");
 
+      delay(5000);
       // 연결된 기기에 블루투스가 끊긴 후 부터 저장된 데이터 전송
       pCharacteristic->setValue((uint8_t*)strValue.c_str(), strValue.length());
       pCharacteristic->notify();
-      delay(1000);
     }
 
-    // 끊김 확인 이후 메모리 시스템이 데이터 저장
-    if(!deviceConnected && write_drink_SPIFFS){
+    // 끊김 확인 이후 메모리 시스템이 데이터 저장, 코스터의 유저가 존재하면서, 블루투스에 연결되지 않았을 때
+    if(!deviceConnected && user_exist == 1){
       ////---------타이머---------////
       String min_data = "";
       String newline = "\r\n";
