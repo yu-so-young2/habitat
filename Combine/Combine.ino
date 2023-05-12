@@ -37,6 +37,8 @@ unsigned long timeVal=0;
 ////---------SPIFFS---------////
 #include "SPIFFS.h"
 String strValue = "";
+void writeFile(const char * path, const char * message);
+void deleteFile(const char * path);
 
 
 ////---------블루투스---------////
@@ -49,12 +51,14 @@ bool deviceConnected = false;
 bool oldDeviceConnected = false;
 bool write_drink_SPIFFS = false;
 int cnt = 0;
-String receive_label = "";
-int receive_data = 0;
+
 int Goal = -1;
-int Alarm = 0;
+String Alarm = ""; //on:T off:
 String account = ""; // 계정
 
+// 한 번 연결된 적이 있는 기기
+///////// 블루투스가 연결되지 않은 상타에서도 사용자의 목표설정값으로 코스터 동작
+int user_exist = 0;
 
 BLEServer *pServer = NULL;
 BLEService *pService = NULL;
@@ -74,26 +78,27 @@ class MyCallbackHandler : public BLECharacteristicCallbacks {
   void onWrite(BLECharacteristic *pCharacteristic) {
     // 수신된 데이터 받아오기
     std::string value = pCharacteristic->getValue();
-    int isvalue=0;
+    int isvalue = 0;
     if (value.length() > 0) {
+      Goal=0;
       Serial.print("Receive");
       Serial.print("Received value: ");
       for (int i = 0; i < value.length(); i++) {
         Serial.print(value[i]);
 
         // lable : data 
-        if((char)value[i]==':')   isvalue=1;
+        if((char)value[i]==' ')   isvalue=1;
         else if(isvalue==0)
-          receive_label = receive_label + (char)value[i];
-        else if(isvalue==1 && (value[i]>='0' && value[i]<='9'))
-          receive_data = receive_data*10 + (int)(value[i]-'0');
+          Goal = Goal*10 + (int)value[i];
+        else if(isvalue==1)
+          Alarm = (char)value[i];
       }
       
-      if(receive_label=="goal")
-        Goal = receive_data;
-      if(receive_label=="alarm")
-        Alarm = receive_data;
-      
+      // 목표설정값, 알람여부 저장
+      String goal_alarm = (String)Goal + " " + (String)Alarm;
+      const char* user_info = goal_alarm.c_str();
+      deleteFile("/user_info.txt");
+      writeFile("/user_info.txt", user_info);
       Serial.println();
     }
   }
@@ -103,6 +108,9 @@ class MyCallbackHandler : public BLECharacteristicCallbacks {
 
 void setup() {
   Serial.begin(115200);
+
+  ////--------목표설정, 알람여부 데이터---------////
+  infoFile("/user_info.txt");
 
   ////---------NeoPixel---------////
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
@@ -116,9 +124,10 @@ void setup() {
     Serial.println("Failed to mount file system");
     return;
   }
-  SPIFFS.format();
+  //SPIFFS.format();
   listDir("/"); 
-  writeFile("/hello.txt", "");
+  deleteFile("/drink_log.txt");
+  writeFile("/drink_log.txt", "");
 
 
   ////---------터치센서---------////
@@ -181,171 +190,177 @@ void setup() {
 }
 
 void loop() {
-  ////--------압력센서--------////
-  // 센서값 받아오면 now_drink에 저장
-  int presssensor_value = analogRead(pressSensor);
-  changeLiter(presssensor_value);
+  if(user_exist==1){
+    ////--------압력센서--------////
+    // 센서값 받아오면 now_drink에 저장
+    int presssensor_value = analogRead(pressSensor);
+    changeLiter(presssensor_value);
 
-  //int value = analogRead(pressSensor);
-  //Serial.println(value);
-  total_drink++;
-  now_drink++;
-  Serial.print("total_drink");
-  Serial.println(total_drink);
-  Serial.print("goal");
-  Serial.println(Goal);
-  
-
-
-  ////--------터치센서---------////
-  int touch_water_state = digitalRead (watertouch);   // 터치센서의 입력값을 state라는 변수에 저장
-  int touch_coffee_state = digitalRead (coffeetouch);
-  int touch_noncoffee_state = digitalRead (noncoffeetouch);
-  // 물 버튼 high
-  if(touch_water_state==HIGH) watercnt++;
-  if(touch_coffee_state==HIGH) coffeecnt++;
-  if(touch_noncoffee_state==HIGH) noncoffeecnt++;
-
-  // 영점조절  
-  if(watercnt>=2)
-  {
-    init_drink = now_drink;
-    watercnt=0;
-    // led색상 변경
-    Serial.println("water");
-    drink_type = "w";
-    colorWipe(strip.Color(0, 0, 255), 50, 10); // blue
-    delay(1000);
-    strip.clear();
-    strip.show();
-  }
-  if(coffeecnt>=2)
-  {
-    init_drink = now_drink;
-    coffeecnt=0;
-    // led색상 변경
-    Serial.println("coffee");
-    drink_type = "c";
-    colorWipe(strip.Color(255, 0, 0), 50, 10); //red
-    delay(1000);
-    strip.clear();
-    strip.show();
-  }
-  if(noncoffeecnt>=2)
-  {
-    init_drink = now_drink;
-    noncoffeecnt=0;
-    // led색상 변경
-    Serial.println("noncoffee");
-    drink_type = "d";
-    colorWipe(strip.Color(0, 255, 0), 50, 10); //green
-    delay(1000);
-    strip.clear();
-    strip.show();
-  }
-
-
-  ///---------NeoPixel---------////
-  if(Goal == total_drink) rainbow(5);
-  // 게이지 상승 
-  if(Goal*0.1 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 1);
-  else if(Goal*0.2 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 2);
-  else if(Goal*0.3 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 3);
-  else if(Goal*0.4 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 4);
-  else if(Goal*0.5 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 5);
-  else if(Goal*0.6 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 6);
-  else if(Goal*0.7 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 7);
-  else if(Goal*0.8 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 8);
-  else if(Goal*0.9 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 9);
-
-  
-  time5sec++;
-  if(time5sec==60){
-    time5sec=0;
-    time5min++;
-  }
-
-  ////---------블루투스---------////
-  // 연결이 잘 되고 있는 상황
-  // 데이터 갱신 후 notification
-  if(deviceConnected){
-    // 물을 마셨음이 확인되면 플러터에 전송
-    if(before_drink != now_drink && time5min%5==0 && time5sec == 0){
-      String min_data = (String)time5min;
-      String stst = (String)now_drink;
-      String data = min_data + drink_type + stst;
-      const char* Data = data.c_str();
-
-      pCharacteristic->setValue(Data);
-      pCharacteristic->notify();
-      delay(3);   // client가 올바르게 정보를 수산할 수 있도록 여유의 시간(레퍼런스에서 3ms)  
-      before_drink = now_drink;
-    }
-  }
-  // 이전에 연결한 기록이 있는 상태에서 연결이 끊긴 상황
-  if (!deviceConnected && oldDeviceConnected) {	// disconnecting
-    delay(500); // give the bluetooth stack the chance to get things ready
-    pServer->startAdvertising(); // 블루투스 재탐색 가능하도록 설정
-    Serial.println("start advertising");
-    oldDeviceConnected = deviceConnected;
-
-    // 블루투스가 끊긴 후 부터 메모리 시스템에 데이터 저장하도록 설정
-    write_drink_SPIFFS = true;
-    // 끊김 확인한 후에 메모리 초기화
-    SPIFFS.format();
-    // 시간도 초기화
-    Sec = 0;
-    Min = 0;
-  }
-  // 연결은 되었지만 이전에 연결한 기록이 없는 상황
-  // 연결된 기기에 데이터 전송
-  if (deviceConnected && !oldDeviceConnected) {	// connecting
-    oldDeviceConnected = deviceConnected;
+    total_drink++;
+    now_drink++;
+    Serial.print("total_drink");
+    Serial.println(total_drink);
+    Serial.print("goal");
+    Serial.println(Goal);
     
-    // 메모리에 데이터 저장 중단
-    write_drink_SPIFFS = false;
-    
-    readFile("/hello.txt");
-
-    // 연결된 기기에 블루투스가 끊긴 후 부터 저장된 데이터 전송
-    pCharacteristic->setValue((uint8_t*)strValue.c_str(), strValue.length());
-    pCharacteristic->notify();
-    delay(1000);
-  }
-
-  // 끊김 확인 이후 메모리 시스템이 데이터 저장
-  if(!deviceConnected && write_drink_SPIFFS){
-    ////---------타이머---------////
-    String min_data = "";
-    String newline = "\r\n";
-    String data  = "";
 
 
-    Sec++;
+    ////--------터치센서---------////
+    int touch_water_state = digitalRead (watertouch);   // 터치센서의 입력값을 state라는 변수에 저장
+    int touch_coffee_state = digitalRead (coffeetouch);
+    int touch_noncoffee_state = digitalRead (noncoffeetouch);
+    // 버튼 high
+    if(touch_water_state==HIGH) watercnt++;
+    if(touch_coffee_state==HIGH) coffeecnt++;
+    if(touch_noncoffee_state==HIGH) noncoffeecnt++;
 
-    if(Sec % 60 == 0 && Sec != 0)
+    // 영점조절  
+    if(watercnt>=2)
     {
+      init_drink = now_drink;
+      watercnt=0;
+      coffeecnt=0;
+      noncoffeecnt=0;
+      // led색상 변경
+      Serial.println("water");
+      drink_type = "w";
+      colorWipe(strip.Color(0, 0, 255), 50, 10); // blue
+      delay(1000);
+      strip.clear();
+      strip.show();
+    }
+    if(coffeecnt>=2)
+    {
+      init_drink = now_drink;
+      watercnt=0;
+      coffeecnt=0;
+      noncoffeecnt=0;
+      // led색상 변경
+      Serial.println("coffee");
+      drink_type = "c";
+      colorWipe(strip.Color(255, 0, 0), 50, 10); //red
+      delay(1000);
+      strip.clear();
+      strip.show();
+    }
+    if(noncoffeecnt>=2)
+    {
+      init_drink = now_drink;
+      watercnt=0;
+      coffeecnt=0;
+      noncoffeecnt=0;
+      // led색상 변경
+      Serial.println("noncoffee");
+      drink_type = "d";
+      colorWipe(strip.Color(0, 255, 0), 50, 10); //green
+      delay(1000);
+      strip.clear();
+      strip.show();
+    }
+
+
+    ///---------NeoPixel---------////
+    if(Goal == total_drink) rainbow(5);
+    // 게이지 상승 
+    if(Goal*0.1 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 1);
+    else if(Goal*0.2 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 2);
+    else if(Goal*0.3 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 3);
+    else if(Goal*0.4 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 4);
+    else if(Goal*0.5 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 5);
+    else if(Goal*0.6 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 6);
+    else if(Goal*0.7 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 7);
+    else if(Goal*0.8 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 8);
+    else if(Goal*0.9 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 9);
+
+    
+    time5sec++;
+    if(time5sec==60){
+      time5sec=0;
+      time5min++;
+    }
+
+    ////---------블루투스---------////
+    // 연결이 잘 되고 있는 상황
+    // 데이터 갱신 후 notification
+    if(deviceConnected){
+      // 물을 마셨음이 확인되면 플러터에 전송
+      if(before_drink != now_drink && time5min%5==0 && time5sec == 0){
+        String min_data = (String)time5min;
+        String stst = (String)now_drink;
+        String data = min_data + drink_type + stst;
+        const char* Data = data.c_str();
+
+        pCharacteristic->setValue(Data);
+        pCharacteristic->notify();
+        delay(3);   // client가 올바르게 정보를 수산할 수 있도록 여유의 시간(레퍼런스에서 3ms)  
+        before_drink = now_drink;
+      }
+    }
+    // 이전에 연결한 기록이 있는 상태에서 연결이 끊긴 상황
+    if (!deviceConnected && oldDeviceConnected) {	// disconnecting
+      delay(500); // give the bluetooth stack the chance to get things ready
+      pServer->startAdvertising(); // 블루투스 재탐색 가능하도록 설정
+      Serial.println("start advertising");
+      oldDeviceConnected = deviceConnected;
+
+      // 블루투스가 끊긴 후 부터 메모리 시스템에 데이터 저장하도록 설정
+      write_drink_SPIFFS = true;
+      // 끊김 확인한 후에 메모리 초기화
+      deleteFile("/drink_log.txt");
+      // 시간도 초기화
       Sec = 0;
-      Min++;
-      Serial.print("Min = ");
-      Serial.println(Min);
+      Min = 0;
+    }
+    // 연결은 되었지만 이전에 연결한 기록이 없는 상황
+    // 연결된 기기에 데이터 전송
+    if (deviceConnected && !oldDeviceConnected) {	// connecting
+      oldDeviceConnected = deviceConnected;
+      
+      // 메모리에 데이터 저장 중단
+      write_drink_SPIFFS = false;
+      
+      readFile("/drink_log.txt");
+
+      // 연결된 기기에 블루투스가 끊긴 후 부터 저장된 데이터 전송
+      pCharacteristic->setValue((uint8_t*)strValue.c_str(), strValue.length());
+      pCharacteristic->notify();
+      delay(1000);
     }
 
-    // m음료타입수분섭취량
-    // 으로 데이터 저장
-    if(before_drink != now_drink){
-      min_data = (String)Min;
-      String drink_st = (String)now_drink;
-      data = min_data + 'w' + drink_st + newline;
-      const char* Data = data.c_str();
+    // 끊김 확인 이후 메모리 시스템이 데이터 저장
+    if(!deviceConnected && write_drink_SPIFFS){
+      ////---------타이머---------////
+      String min_data = "";
+      String newline = "\r\n";
+      String data  = "";
 
-      appendFile("/hello.txt", Data);
+      Sec++;
 
-      before_drink = now_drink;
+      if(Sec % 60 == 0 && Sec != 0)
+      {
+        Sec = 0;
+        Min++;
+        Serial.print("Min = ");
+        Serial.println(Min);
+      }
+
+      // m음료타입수분섭취량
+      // 으로 데이터 저장
+      if(before_drink != now_drink){
+        min_data = (String)Min;
+        String drink_st = (String)now_drink;
+        data = min_data + drink_type + drink_st + newline;
+        const char* Data = data.c_str();
+
+        appendFile("/drink_log.txt", Data);
+
+        before_drink = now_drink;
+      }
+
     }
+      delay(1000);
 
   }
-    delay(1000);
   
 }
 
@@ -394,6 +409,42 @@ void readFile(const char * path){
   Serial.println("string");
   Serial.println(strValue);  
 }
+
+
+void infoFile(const char * path){
+  Serial.printf("Reading file: %s\r\n", path);
+  File file = SPIFFS.open(path, "r");
+  if(!file || file.isDirectory()){
+    Serial.println("- failed to open file for reading");
+    user_exist = 0;
+    return;
+  }
+  
+  // 데이터 구분
+  int next_idx = 0;
+  // 목표 초기화
+  Goal = 0;
+  // 데이터가 존재하는 것은 사용자에 대한 정보가 있다는 것임
+  user_exist = 1;
+  
+  Serial.println("read from file:");
+  while(file.available()){
+    int data = file.read();
+    Serial.write(data);
+
+    if(data == ' ') next_idx=1;
+    else if(next_idx==0)
+      Goal = Goal*10 + (int)data;
+    else if(next_idx==1)
+      Alarm = (char)data;
+  }
+
+  Serial.println("Goal, Alarm");
+  Serial.print(Goal);
+  Serial.print(", ");
+  Serial.print(Alarm);
+}
+
 
 void writeFile(const char * path, const char * message){
   Serial.printf("Writing file: %s\r\n", path);
