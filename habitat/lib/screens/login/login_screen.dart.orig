@@ -32,10 +32,13 @@ class LoginScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+<<<<<<< HEAD
+=======
               Image.asset('lib/assets/images/characters/MangWull.png'),
               const SizedBox(
                 height: 20,
               ),
+>>>>>>> 362660e51e668f2c8cb813e15dac8ada3a36ba18
               TextButton(
                 onPressed: () async {
                   await Get.find<UserController>().signWithGoogle();
@@ -43,6 +46,25 @@ class LoginScreen extends StatelessWidget {
                     Navigator.pushReplacementNamed(context, '/main');
                   }
                 },
+<<<<<<< HEAD
+                child: const Text("Sign in with Google"),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pushReplacementNamed(context, '/main');
+                },
+                child: const Text(
+                  "비밀의 문",
+                  style: TextStyle(fontSize: 32),
+                ),
+              ),
+              GetX<UserController>(builder: (controller) {
+                return Text(
+                  controller.loginSuccess.value ? '' : '실패',
+                  style: const TextStyle(fontSize: 32),
+                );
+              })
+=======
                 child: const Text(
                   "Sign in with Google",
                   style: TextStyle(
@@ -51,6 +73,7 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
               ),
+>>>>>>> 362660e51e668f2c8cb813e15dac8ada3a36ba18
             ],
           ),
         ));
