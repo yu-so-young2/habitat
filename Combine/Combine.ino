@@ -40,6 +40,8 @@ void writeFile(const char * path, const char * message);
 void deleteFile(const char * path);
 
 
+
+
 ////---------블루투스---------////
 #include <BLEDevice.h>
 #include <BLEServer.h>
@@ -50,6 +52,11 @@ bool deviceConnected = false;
 bool oldDeviceConnected = false;
 
 int cnt = 0;
+String receive_label = "";
+int receive_data = 0;
+int Goal = -1;
+int Alarm = 0;
+String account = ""; // 계정
 
 int Goal = -1;
 String Alarm = ""; //on:T off:
@@ -135,6 +142,8 @@ void setup() {
   pinMode (watertouch, INPUT);     // 터치센서 신호값을 입력으로 설정
   pinMode (coffeetouch, INPUT);
   pinMode (noncoffeetouch, INPUT);
+
+
 
 
   ////---------블루투스---------////
@@ -370,6 +379,9 @@ void changeLiter(int drink){
   /// 값 변경
 
 }
+
+////---------SPIFFS---------////
+
 
 ////---------SPIFFS---------////
 
