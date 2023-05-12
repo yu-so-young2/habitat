@@ -14,13 +14,10 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   int presssensor_value = analogRead(pressSensor);
-  if(presssensor_value<=200)
-  {
-    
-  }
+
   changeLiter(presssensor_value);
   Serial.println(presssensor_value);
-  delay(3000);
+  delay(1000);
 }
 
 
