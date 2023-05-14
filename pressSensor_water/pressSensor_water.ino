@@ -38,6 +38,8 @@ void loop() {
       init_water = presssensor_value - 750 - cork;
       Serial.println(presssensor_value - 750);
       drink_before = init_water;
+      value_cnt=0;
+      value_sum=0;
     }
     // 영점 세팅 이후에 물을 마신 후의 데이터 처리
     if(sensing_flag == 1)
