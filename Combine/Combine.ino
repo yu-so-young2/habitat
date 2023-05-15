@@ -4,20 +4,27 @@
 #define LED_PIN 13     //네오픽셀에 신호를 줄 핀번호
 #define LED_COUNT 10  //아두이노에 연결된 네오픽셀의 개수
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_RGBW + NEO_KHZ800);
-
+// GRB
 
 ////---------압력센서---------////
-int init_drink=0;
-int before_drink=-1;
-int now_drink=0;
+int init_water=0;
+int init_coffee=0;
+int init_noncoffee=0;
+int drink_before=0;
+int drink_now=0;
+int changeliter=0;
 int total_drink=0;
 const int pressSensor = 26;    // SIG를 26번 핀에 연결
-
+int sensing_flag = 0;
+int value_sum=0;
+int value_cnt=0;
+int cork=0;
+int liter10 = 9;
 
 ////---------터치센서---------////
 const int watertouch = 14;     // SIG를 14번 핀에 연결
-const int coffeetouch = 15;     // SIG를 15번 핀에 연결
-const int noncoffeetouch = 16;     // SIG를 16번 핀에 연결
+const int coffeetouch = 33;     // SIG를 33번 핀에 연결
+const int noncoffeetouch = 32;     // SIG를 32번 핀에 연결
 
 int watercnt=0;
 int coffeecnt=0;
@@ -40,8 +47,6 @@ void writeFile(const char * path, const char * message);
 void deleteFile(const char * path);
 
 
-
-
 ////---------블루투스---------////
 #include <BLEDevice.h>
 #include <BLEServer.h>
@@ -52,11 +57,6 @@ bool deviceConnected = false;
 bool oldDeviceConnected = false;
 
 int cnt = 0;
-String receive_label = "";
-int receive_data = 0;
-int Goal = -1;
-int Alarm = 0;
-String account = ""; // 계정
 
 int Goal = -1;
 String Alarm = ""; //on:T off:
@@ -144,8 +144,6 @@ void setup() {
   pinMode (noncoffeetouch, INPUT);
 
 
-
-
   ////---------블루투스---------////
   Serial.println("Starting BLE...");
   // BLE 장치 이름
@@ -204,15 +202,6 @@ void loop() {
     ////--------압력센서--------////
     // 센서값 받아오면 now_drink에 저장
     int presssensor_value = analogRead(pressSensor);
-    changeLiter(presssensor_value);
-
-    total_drink++;
-    now_drink++;
-    Serial.print("total_drink");
-    Serial.println(total_drink);
-    Serial.print("goal");
-    Serial.println(Goal);
-    
 
 
     ////--------터치센서---------////
@@ -224,48 +213,111 @@ void loop() {
     if(touch_coffee_state==HIGH) coffeecnt++;
     if(touch_noncoffee_state==HIGH) noncoffeecnt++;
 
-    // 영점조절  
-    if(watercnt>=2)
+    // cork가 누르는 압력이 최대 600 == 컵이 있는 경우
+    if(presssensor_value >= 700)
     {
-      init_drink = now_drink;
-      watercnt=0;
-      coffeecnt=0;
-      noncoffeecnt=0;
-      // led색상 변경
-      Serial.println("water");
-      drink_type = "w";
-      colorWipe(strip.Color(0, 0, 255), 50, 10); // blue
-      delay(1000);
-      strip.clear();
-      strip.show();
+      // 영점조절  
+      if(watercnt>=1)
+      {
+        // 터치센서 동작하게되면 압력센서 출력값이 올라감
+        init_water = presssensor_value - 750 - cork;
+
+        // 터치센서 변수 초기화
+        watercnt=0;
+        coffeecnt=0;
+        noncoffeecnt=0;
+
+        // led색상 변경
+        Serial.println("water");
+        drink_type = "w";
+        colorWipe(strip.Color(0, 0, 205), 50, 10); // blue
+        delay(2000);
+        strip.clear();
+        strip.show();
+
+        drink_before = init_water;
+        value_sum=0;
+        value_cnt=0;
+
+      }
+      if(coffeecnt>=1)
+      {
+        // 터치센서 동작하게되면 압력센서 출력값이 올라감
+        init_coffee = presssensor_value - 750 - cork;
+
+        // 터치센서 변수 초기화
+        watercnt=0;
+        coffeecnt=0;
+        noncoffeecnt=0;
+
+        // led색상 변경
+        Serial.println("coffee");
+        drink_type = "c";
+        colorWipe(strip.Color(43, 138, 220), 50, 10); //pink
+        delay(2000);
+        strip.clear();
+        strip.show();
+
+        drink_before = init_coffee;
+        value_sum=0;
+        value_cnt=0;
+      }
+      if(noncoffeecnt>=1)
+      {
+        // 터치센서 동작하게되면 압력센서 출력값이 올라감
+        init_noncoffee = presssensor_value - 750 - cork;
+
+        // 터치센서 변수 초기화
+        watercnt=0;
+        coffeecnt=0;
+        noncoffeecnt=0;
+
+        // led색상 변경
+        Serial.println("noncoffee");
+        drink_type = "d";
+        colorWipe(strip.Color(255, 255, 0), 50, 10); //yellow
+        delay(2000);
+        strip.clear();
+        strip.show();
+
+        drink_before = init_noncoffee;
+        value_sum=0;
+        value_cnt=0;
+      }
+
+      // 영점 세팅 이후에 물을 마신 후의 데이터 처리
+      if(sensing_flag == 1)
+      {
+        if(value_cnt>=10)
+        {
+          drink_now = value_sum/value_cnt;
+          changeLiter(drink_now);
+          Serial.println("change");
+          value_sum=0;
+          value_cnt=0;
+          sensing_flag=0;
+        }
+        else
+        {
+          value_sum+=(presssensor_value - cork);
+          value_cnt++;
+        } 
+
+      }
+
     }
-    if(coffeecnt>=2)
+    // 음료를 마시기 위해 컵을 들었음(가정)
+    else if(presssensor_value < 700 && init_water>0)
     {
-      init_drink = now_drink;
-      watercnt=0;
-      coffeecnt=0;
-      noncoffeecnt=0;
-      // led색상 변경
-      Serial.println("coffee");
-      drink_type = "c";
-      colorWipe(strip.Color(255, 0, 0), 50, 10); //red
-      delay(1000);
-      strip.clear();
-      strip.show();
+      sensing_flag = 1;
+      Serial.println("check");
+      value_sum=0;
+      value_cnt=0;
     }
-    if(noncoffeecnt>=2)
+    // 음료가 없음
+    else if(presssensor_value < 700 )
     {
-      init_drink = now_drink;
-      watercnt=0;
-      coffeecnt=0;
-      noncoffeecnt=0;
-      // led색상 변경
-      Serial.println("noncoffee");
-      drink_type = "d";
-      colorWipe(strip.Color(0, 255, 0), 50, 10); //green
-      delay(1000);
-      strip.clear();
-      strip.show();
+      cork = presssensor_value;
     }
 
 
@@ -294,16 +346,16 @@ void loop() {
     // 데이터 갱신 후 notification
     if(deviceConnected){
       // 물을 마셨음이 확인되면 플러터에 전송
-      if(before_drink != now_drink && time5min%3==0 && time5sec == 0){
+      if(drink_before != drink_now && time5min%3==0 && time5sec == 0){
         String min_data = (String)time5min;
-        String stst = (String)now_drink;
+        String stst = (String)changeliter;
         String data = min_data + drink_type + stst;
         const char* Data = data.c_str();
 
         pCharacteristic->setValue(Data);
         pCharacteristic->notify();
         delay(3);   // client가 올바르게 정보를 수산할 수 있도록 여유의 시간(레퍼런스에서 3ms)  
-        before_drink = now_drink;
+        drink_before = drink_now;
       }
     }
     // 이전에 연결한 기록이 있는 상태에서 연결이 끊긴 상황
@@ -328,7 +380,7 @@ void loop() {
       // 메모리에 데이터 저장 중단
       
       readFile("/drink_log.txt");
-
+      Serial.println("send data");
       delay(5000);
       // 연결된 기기에 블루투스가 끊긴 후 부터 저장된 데이터 전송
       pCharacteristic->setValue((uint8_t*)strValue.c_str(), strValue.length());
@@ -354,34 +406,37 @@ void loop() {
 
       // m음료타입수분섭취량
       // 으로 데이터 저장
-      if(before_drink != now_drink){
+      if(drink_before != drink_now){
         min_data = (String)Min;
-        String drink_st = (String)now_drink;
+        String drink_st = (String)changeliter;
         data = min_data + drink_type + drink_st + newline;
         const char* Data = data.c_str();
 
         appendFile("/drink_log.txt", Data);
 
-        before_drink = now_drink;
+        drink_before = drink_now; 
+
       }
-
     }
+      Serial.println(presssensor_value);
       delay(1000);
-
   }
   
 }
 
 ////---------압력센서--------////
 void changeLiter(int drink){
-  now_drink = init_drink - drink;
+  int now_drink = drink_before - drink;
 
-  /// 값 변경
+  changeliter = now_drink/liter10;
+  total_drink += changeliter;
+
+  Serial.print("nowdrink: ");
+  Serial.println(now_drink);
+  Serial.print("changeliter: ");
+  Serial.println(changeliter);
 
 }
-
-////---------SPIFFS---------////
-
 
 ////---------SPIFFS---------////
 
