@@ -21,6 +21,8 @@ int value_cnt=0;
 int send_flag=0;
 int cork=0;
 int init_flag =0;
+int drink_time_alarm1=0;
+int drink_time_alarm2=0;
 ////---------터치센서---------////
 const int watertouch = 25;     // SIG를 25번 핀에 연결
 const int coffeetouch = 33;     // SIG를 33번 핀에 연결
@@ -392,6 +394,10 @@ void loop() {
               
             }
           }
+
+          // 물을 마셨을 경우 알람 타이머 초기화
+          drink_time_alarm1=0;
+          drink_time_alarm1=0;
         }
 
         value_cnt++;
@@ -405,6 +411,27 @@ void loop() {
       Serial.println("check");
       value_sum=0;
       value_cnt=0;
+
+      ////  알람기능 ON
+      /// char 은 ' '
+      /// string 은 " "
+      if(Alarm == "T"){
+        if(drink_time_alarm2 == 0)
+          drink_time_alarm1++;
+        else if(drink_time_alarm2>=1)
+          drink_time_alarm2++;
+        // 물을 마신지 1시간이 지난 경우 알람을 줌, 1시간 알람을 받은 이후에도 물을 마시지 않은 경우 30분 간격으로 알람을 줌
+        if(drink_time_alarm1 >=360 || drink_time_alarm2 >=180)
+        {
+          for(int i = 0; i<3; i++)
+          {
+            colorWipe(strip.Color(0, 255, 0), 50, 10);
+            delay(500);
+          } 
+          drink_time_alarm1 = 0;
+          drink_time_alarm2 = 1;
+        }
+      }
     }
     // 음료가 없음
     else if(FSR < 3 )
@@ -651,8 +678,6 @@ void deleteFile(const char * path){
     Serial.println("delete failed");
   }
 }
-
-
 
 
 ////---------NeoPixel--------////
