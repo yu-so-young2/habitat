@@ -22,11 +22,16 @@ void main() async {
 
   await NotificationService.initializeNotification();
 
-  const storage = FlutterSecureStorage();
+<<<<<<< HEAD
+  // final WebSocketChannel channel = IOWebSocketChannel.connect(
+  //     'ws://k8a704.p.ssafy.io/api/websocket/{userKey}');
+=======
+  const storage = const FlutterSecureStorage();
   Future<String?> userKey = storage.read(key: 'userKey');
 
   // final WebSocketChannel channel = IOWebSocketChannel.connect(
   //     'ws://k8a704.p.ssafy.io/api/websocket/$userKey');
+>>>>>>> ee0a072874e35fe3e5e8ae24467b46e6f928e497
 
   GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
