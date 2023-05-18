@@ -5,6 +5,7 @@
 #define LED_COUNT 13  //아두이노에 연결된 네오픽셀의 개수
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_RGBW + NEO_KHZ800);
 void colorWipe(uint32_t color, int wait, int gauge);
+void rainbow(int wait, int num);
 // GRB
 
 ////---------압력센서---------////
@@ -80,9 +81,7 @@ BLEAdvertising *pAdvertising = NULL;
 class MyServerCallbacks: public BLEServerCallbacks {
   void onConnect(BLEServer* pServer) {deviceConnected = true;
   Serial.println("connect");
-  colorWipe(strip.Color(255, 255, 255), 0, 13);
-  delay(500);
-  colorWipe(strip.Color(255, 255, 255), 0, 13);};
+  rainbow(5, 1);}
   void onDisconnect(BLEServer* pServer) {deviceConnected = false;}
 };
 
@@ -242,9 +241,7 @@ void loop() {
         Serial.println("water");
         drink_type = "w";
         colorWipe(strip.Color(0, 0, 205), 50, 10); // blue
-        delay(2000);
-        strip.clear();
-        strip.show();
+
 
         drink_before = init_water;
         value_sum=0;
@@ -265,10 +262,7 @@ void loop() {
         // led색상 변경
         Serial.println("coffee");
         drink_type = "c";
-        colorWipe(strip.Color(43, 138, 220), 50, 10); //pink
-        delay(2000);
-        strip.clear();
-        strip.show();
+        colorWipe(strip.Color(0, 220, 220), 50, 10); //pink
 
         drink_before = init_coffee;
         value_sum=0;
@@ -290,9 +284,6 @@ void loop() {
         Serial.println("noncoffee");
         drink_type = "d";
         colorWipe(strip.Color(255, 255, 0), 50, 10); //yellow
-        delay(2000);
-        strip.clear();
-        strip.show();
 
         drink_before = init_noncoffee;
         value_sum=0;
@@ -377,7 +368,7 @@ void loop() {
 
 
     ///---------NeoPixel---------////
-    if(Goal == total_drink) rainbow(5);
+    if(Goal == total_drink) rainbow(5, 4);
     // 게이지 상승 
     if(Goal*0.1 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 1);
     else if(Goal*0.2 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 2);
@@ -624,10 +615,13 @@ void colorWipe(uint32_t color, int wait, int gauge) {
     strip.show();                          //  Update strip to match
     delay(wait);                           //  Pause for a moment
   }
+  delay(2000);
+  strip.clear();
+  strip.show();
 }
 
-void rainbow(int wait) {  
-  for (long firstPixelHue = 0; firstPixelHue < 4 * 65536; firstPixelHue += 256) {
+void rainbow(int wait, int num) {  
+  for (long firstPixelHue = 0; firstPixelHue < num * 65536; firstPixelHue += 256) {
     for (int i = 0; i < strip.numPixels(); i++) { 
       int pixelHue = firstPixelHue + (i * 65536L / strip.numPixels());      
       strip.setPixelColor(i, strip.gamma32(strip.ColorHSV(pixelHue)));
@@ -635,4 +629,7 @@ void rainbow(int wait) {
     strip.show();
     delay(wait);
   }
+  delay(2000);
+  strip.clear();
+  strip.show();
 }
