@@ -1,4 +1,4 @@
-const int touchsensor = 14;      // 터치센서 SIG를 14번 핀에 연결
+const int touchsensor = 25;      // 터치센서 SIG를 14번 핀에 연결
 int state = 0;                  // 현재 상태 변수 선언
 
 int cnt=0;

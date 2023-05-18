@@ -36,10 +36,15 @@ void loop() {
   int FSR = exp(0.00467*presssensor_value);
   //1 : 37g으로 두기
   
+  //int FSR = exp(0.01587*presssensor_value);
+  
   // int FSR = ((20015 - presssensor_value) * 2000) / presssensor_value;
   
   Serial.print("FSR : ");
   Serial.println(FSR);
+  Serial.print("무게 : ");
+  Serial.println(18.5*FSR);
+  
 
   state = digitalRead (touchsensor); 
 
