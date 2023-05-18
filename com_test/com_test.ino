@@ -34,7 +34,7 @@ int watercnt=0;
 int coffeecnt=0;
 int noncoffeecnt=0;
 
-String drink_type="w";
+char drink_type='w';
 
 
 ////---------타이머---------////
@@ -81,6 +81,7 @@ BLEAdvertising *pAdvertising = NULL;
 class MyServerCallbacks: public BLEServerCallbacks {
   void onConnect(BLEServer* pServer) {deviceConnected = true;
   Serial.println("connect");
+  delay(500);
   rainbow(5, 1);}
   void onDisconnect(BLEServer* pServer) {deviceConnected = false;}
 };
@@ -230,7 +231,7 @@ void loop() {
       if(watercnt>=1)
       {
         // 터치센서 동작하게되면 압력센서 출력값이 올라감
-        init_water = 18.5*(FSR - 25);
+        init_water = 18.5*(FSR);
 
         // 터치센서 변수 초기화
         watercnt=0;
@@ -239,7 +240,7 @@ void loop() {
 
         // led색상 변경
         Serial.println("water");
-        drink_type = "w";
+        drink_type = 'w';
         colorWipe(strip.Color(0, 0, 205), 50, 10); // blue
 
 
@@ -252,7 +253,7 @@ void loop() {
       if(coffeecnt>=1)
       {
         // 터치센서 동작하게되면 압력센서 출력값이 올라감
-        init_coffee = 18.5*(FSR - 25);
+        init_coffee = 18.5*(FSR);
 
         // 터치센서 변수 초기화
         watercnt=0;
@@ -261,7 +262,7 @@ void loop() {
 
         // led색상 변경
         Serial.println("coffee");
-        drink_type = "c";
+        drink_type = 'c';
         colorWipe(strip.Color(0, 220, 220), 50, 10); //pink
 
         drink_before = init_coffee;
@@ -273,7 +274,7 @@ void loop() {
       {
         // 터치센서 동작하게되면 압력센서 출력값이 올라감
         
-        init_noncoffee = 18.5*(FSR - 25);
+        init_noncoffee = 18.5*(FSR);
 
         // 터치센서 변수 초기화
         watercnt=0;
@@ -282,7 +283,7 @@ void loop() {
 
         // led색상 변경
         Serial.println("noncoffee");
-        drink_type = "d";
+        drink_type = 'd';
         colorWipe(strip.Color(255, 255, 0), 50, 10); //yellow
 
         drink_before = init_noncoffee;
@@ -294,7 +295,7 @@ void loop() {
       // 영점 세팅 이후에 물을 마신 후의 데이터 처리
       if(sensing_flag == 1)
       {
-        if(value_cnt>=3)
+        if(value_cnt > 1)
         {
           // drink_now = value_sum/(value_cnt-3);
           // changeLiter(drink_now);
@@ -304,9 +305,8 @@ void loop() {
           // sensing_flag=0;
           // init_flag=1;
           // drink_before = drink_now;
-          int now_drink = random(60, 150);
-          changeliter = now_drink;
-          drink_now=changeliter;
+          changeliter = random(60, 150);
+          drink_now = changeliter;
           total_drink += changeliter;
           Serial.print("total : ");
           Serial.print(total_drink);
@@ -325,6 +325,20 @@ void loop() {
           drink_time_alarm1=0;
 
           sensing_flag=0;
+
+
+          ///---------NeoPixel---------////
+          if(Goal <= total_drink) rainbow(5, 4);
+          // 게이지 상승 
+          if(Goal*0.9 <= total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 9);
+          else if(Goal*0.8 <= total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 8);
+          else if(Goal*0.7 <= total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 7);
+          else if(Goal*0.6 <= total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 6);
+          else if(Goal*0.5 <= total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 5);
+          else if(Goal*0.4 <= total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 4);
+          else if(Goal*0.3 <= total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 3);
+          else if(Goal*0.2 <= total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 2);
+          else if(Goal*0.1 <= total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 1);
         }
 
         value_cnt++;
@@ -367,18 +381,7 @@ void loop() {
     }
 
 
-    ///---------NeoPixel---------////
-    if(Goal == total_drink) rainbow(5, 4);
-    // 게이지 상승 
-    if(Goal*0.1 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 1);
-    else if(Goal*0.2 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 2);
-    else if(Goal*0.3 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 3);
-    else if(Goal*0.4 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 4);
-    else if(Goal*0.5 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 5);
-    else if(Goal*0.6 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 6);
-    else if(Goal*0.7 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 7);
-    else if(Goal*0.8 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 8);
-    else if(Goal*0.9 == total_drink)    colorWipe(strip.Color(255, 255, 255), 50, 9);
+    
 
     
     time5sec++;
@@ -475,17 +478,17 @@ void loop() {
 }
 
 ////---------압력센서--------////
-void changeLiter(int drink){
-  int now_drink = drink_before - drink;
-  changeliter = 18.5 * now_drink;
-  total_drink += changeliter;
-  send_flag = 1;
+// void changeLiter(int drink){
+//   int now_drink = drink_before - drink;
+//   changeliter = 18.5 * now_drink;
+//   total_drink += changeliter;
+//   send_flag = 1;
   
-  Serial.print("nowdrink: ");
-  Serial.println(now_drink);
-  Serial.print("changeliter: ");
-  Serial.println(changeliter);
-}
+//   Serial.print("nowdrink: ");
+//   Serial.println(now_drink);
+//   Serial.print("changeliter: ");
+//   Serial.println(changeliter);
+// }
 
 ////---------SPIFFS---------////
 

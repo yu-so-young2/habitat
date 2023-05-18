@@ -2,7 +2,7 @@
 
 //고정적으로 사용할 내용을 미리 선언
 #define LED_PIN 12     //네오픽셀에 신호를 줄 핀번호
-#define LED_COUNT 13  //아두이노에 연결된 네오픽셀의 개수
+#define LED_COUNT 12  //아두이노에 연결된 네오픽셀의 개수
 
 // 우리가 사용하는 모듈은 NEO_RGBW!!!
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_RGBW + NEO_KHZ800);
