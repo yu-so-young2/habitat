@@ -2,7 +2,7 @@
 
 //고정적으로 사용할 내용을 미리 선언
 #define LED_PIN 12     //네오픽셀에 신호를 줄 핀번호
-#define LED_COUNT 12  //아두이노에 연결된 네오픽셀의 개수
+#define LED_COUNT 9  //아두이노에 연결된 네오픽셀의 개수
 
 // 우리가 사용하는 모듈은 NEO_RGBW!!!
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_RGBW + NEO_KHZ800);
@@ -24,8 +24,10 @@ void setup() {
   Serial.begin(115200);
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   strip.show();            // 네오픽셀에 빛을 출력하기 위한 것인데 여기서는 모든 네오픽셀을 OFF하기 위해서 사용한다.
+  //colorWipe(strip.Color(200, 200, 200), 50);
   strip.setBrightness(50); // 네오픽셀의 밝기 설정(최대 255까지 가능)
-  rainbow(10); 
+  // delay(4000);
+  // rainbow(5); 
 }
 
 void loop() {
@@ -46,20 +48,26 @@ void loop() {
   // theaterChase(strip.Color(  0,   0, 127), 50); // Blue, half brightness
 
   // // 전체 스트립에 색을 흐르는 무지개빛처럼 돌아가며 출력
-             
+  for(int i = 0; i<3; i++)
+  {
+    colorWipe(strip.Color(0, 255, 0), 50, 9);
+    delay(500);
+  } 
   // // 위에 theaterChase효과를 무지개빛으로 출력
   // theaterChaseRainbow(50); 
   
   //해당 함수들은 밑에 구현되어있다.
 }
 
-void colorWipe(uint32_t color, int wait) {
-  for (int i = 0; i < strip.numPixels(); i++) { // For each pixel in strip...
-    Serial.println(i);
+void colorWipe(uint32_t color, int wait, int gauge) {
+  for (int i = 0; i < gauge; i++) { // For each pixel in strip...
     strip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
     strip.show();                          //  Update strip to match
     delay(wait);                           //  Pause for a moment
   }
+  delay(2000);
+  strip.clear();
+  strip.show();
 }
 
 void theaterChase(uint32_t color, int wait) {
